@@ -1,0 +1,11 @@
+package nebula:gateway;
+
+world gateway {
+    import nebula:core/types;
+    import nebula:inventory/inventory-api;
+    import nebula:pricing/pricing-api;
+
+    import wasi:cli/stdout@0.2.8;
+
+    export wasi:http/incoming-handler@0.2.8;
+}

@@ -1,0 +1,4 @@
+[overrides]
+"nebula:core" = { path = "../wit" }
+"nebula:inventory" = { path = "../inventory/wit" }
+"nebula:pricing" = { path = "../pricing/wit" }
