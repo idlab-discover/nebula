@@ -11,7 +11,7 @@ struct InventoryApi;
 
 impl Guest for InventoryApi {
 	fn check_stock(items: Vec<Item>) -> Vec<Stock> {
-		items.iter().map(assess_fulfillment).collect()
+		items.iter().flat_map(assess_fulfillment).collect()
 	}
 }
 

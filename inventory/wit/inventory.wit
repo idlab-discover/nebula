@@ -3,8 +3,8 @@ package nebula:inventory;
 /// Internal interface for warehouse engine interactions
 interface warehouse-engine {
     use nebula:core/types.{item, stock};
-    /// Check stock for an item in a specific warehouse
-    assess-fulfillment: func(items: item) -> stock;
+    /// Check stock for an item over all warehouses
+    assess-fulfillment: func(item: item) -> list<stock>;
 }
 
 /// Internal interface for database engine interactions

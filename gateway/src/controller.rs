@@ -1,5 +1,4 @@
 use serde_json::json;
-use std::collections::HashMap;
 use wasi_http_framework::{Request, Response};
 
 use crate::nebula::core::types::Order;
@@ -7,7 +6,6 @@ use crate::nebula::inventory::inventory_api;
 use crate::nebula::pricing::pricing_api;
 use crate::schema::{OrderRequest, QuoteResponse};
 
-/// Handle an incoming order request.
 pub fn handle_order_request(req: &Request) -> Response {
 	let body = serde_json::from_slice::<OrderRequest>(&req.body);
 
@@ -21,27 +19,56 @@ pub fn handle_order_request(req: &Request) -> Response {
 		},
 	};
 
-	// Check stock for each item in the order.
 	let items = &order.items;
 	let stock_checks = inventory_api::check_stock(items);
 
-	let item_map: HashMap<_, _> =
-		items.iter().map(|i| (i.sku.clone(), i)).collect();
+	for item in items {
+		let mut total_available_stock = 0;
+		let mut item_found_in_inventory = false;
 
-	for stock in stock_checks {
-		if let Some(item) = item_map.get(&stock.sku)
-			&& stock.quantity < item.quantity
-		{
+		for stock_entry in &stock_checks {
+			if stock_entry.sku == item.sku {
+				item_found_in_inventory = true;
+				total_available_stock += stock_entry.quantity;
+			}
+		}
+
+		if !item_found_in_inventory {
+			let code = "ITEM_NOT_FOUND";
+
+			let error = format!(
+				"Item {} is not recognized by the inventory system.",
+				item.sku
+			);
+
 			return Response::json(
-				json!({ "error": format!("Item {} is out of stock", stock.sku) }),
+				json!({
+					"error": error,
+					"code": code
+				}),
+				400,
+			);
+		}
+
+		if item.quantity > total_available_stock {
+			let code = "INSUFFICIENT_STOCK";
+
+			let error = format!(
+				"Item {} is out of stock (Available: {}, Requested: {}).",
+				item.sku, total_available_stock, item.quantity
+			);
+
+			return Response::json(
+				json!({
+					"error": error,
+					"code": code
+				}),
 				400,
 			);
 		}
 	}
 
-	// Create a quote for the order
 	let quote = pricing_api::generate_quote(&order);
 
-	// Return the quote as JSON response
 	Response::json(QuoteResponse::from(quote), 201)
 }
