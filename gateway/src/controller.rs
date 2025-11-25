@@ -30,17 +30,18 @@ pub fn handle_order_request(req: &Request) -> Response {
 
 	for stock in stock_checks {
 		if let Some(item) = item_map.get(&stock.sku)
-			&& stock.quantity < item.quantity {
-				return Response::json(
-					json!({ "error": format!("Item {} is out of stock", stock.sku) }),
-					400,
-				);
-			}
+			&& stock.quantity < item.quantity
+		{
+			return Response::json(
+				json!({ "error": format!("Item {} is out of stock", stock.sku) }),
+				400,
+			);
+		}
 	}
 
 	// Create a quote for the order
 	let quote = pricing_api::generate_quote(&order);
 
 	// Return the quote as JSON response
-	Response::json(QuoteResponse::from(quote), 200)
+	Response::json(QuoteResponse::from(quote), 201)
 }

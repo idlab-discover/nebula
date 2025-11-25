@@ -1,6 +1,7 @@
 use crate::nebula::core::types::{Item, Order, Quote};
 
 #[derive(serde::Deserialize)]
+#[serde(rename_all = "camelCase")]
 pub struct ItemRequest {
 	sku: String,
 	quantity: u32,
@@ -18,6 +19,7 @@ impl From<ItemRequest> for Item {
 }
 
 #[derive(serde::Deserialize)]
+#[serde(rename_all = "camelCase")]
 pub struct OrderRequest {
 	pub order_id: String,
 	pub items: Vec<ItemRequest>,
@@ -28,13 +30,18 @@ impl From<OrderRequest> for Order {
 	fn from(order: OrderRequest) -> Self {
 		Order {
 			order_id: order.order_id,
-			items: order.items.into_iter().map(std::convert::Into::into).collect(),
+			items: order
+				.items
+				.into_iter()
+				.map(std::convert::Into::into)
+				.collect(),
 			destination: order.destination,
 		}
 	}
 }
 
 #[derive(serde::Serialize)]
+#[serde(rename_all = "camelCase")]
 pub struct QuoteResponse {
 	subtotal: f32,
 	tax: f32,
