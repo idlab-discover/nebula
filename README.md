@@ -45,13 +45,13 @@ Content-Type: application/json
 
 ### The `Inventory` actor
 
-- `inventory-api` (Rust) - an outer shell exporting `wasi:http`
+- `inventory-api` (Rust) - an outer shell exposing the main functionality
 - `warehouse-engine` (Rust) - business rules for shipping
 - `database-engine` (C++) - A specialized, highly optimized driver (mocked)
 
 ### The `Pricing` actor
 
-- `pricing-api` (Rust) - an outer shell exporting `wasi:http`
+- `pricing-api` (Rust) - an outer shell exporting the main functionality
 - `tax-engine` (Typescript) - calculates VAT based on country rules
 - `currency-engine` (Rust) - fetch live currency rates (mocked)
 

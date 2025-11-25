@@ -1,0 +1,33 @@
+package nebula:core;
+
+interface types {
+  /// A single item in an order
+  record item {
+    sku: string,
+    quantity: u32,
+    unit-price: f64,
+  }
+
+  /// An order with items and destination
+  record order {
+    order-id: string,
+    items: list<item>,
+    destination: string,
+  }
+
+  /// A stock entry for an item
+  record stock {
+    sku: string,
+    quantity: u32,
+    warehouse-id: string,
+  }
+
+  /// A price quote for an order
+  record quote {
+    subtotal: f32,
+    tax: f32,
+    total: f32,
+    currency: string,
+  }
+}
+
