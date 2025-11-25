@@ -1,0 +1,22 @@
+package nebula:inventory;
+
+/// Internal interface for warehouse engine interactions
+interface warehouse-engine {
+    use nebula:core/types.{item, stock};
+    /// Check stock for an item in a specific warehouse
+    assess-fulfillment: func(items: list<item>) -> stock;
+}
+
+/// Internal interface for database engine interactions
+interface database-engine {
+    /// Simulate a SQL query to get the stock level
+    /// for a given SKU in a specific warehouse.
+    get-stock-level: func(sku: string, warehouse-id: string) -> u32;
+}
+
+/// External interface for inventory API
+interface inventory-api {
+    use nebula:core/types.{item, stock};
+    /// Check the stock levels for a list of items
+    check-stock: func(items: list<item>) -> list<stock>;
+}

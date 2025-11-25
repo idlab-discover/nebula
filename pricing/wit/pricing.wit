@@ -1,0 +1,20 @@
+package nebula:pricing;
+
+/// Internal interface for currency conversion engine
+interface currency-engine {
+    /// Get the conversion rate for a target currency
+    get-rate: func(target-currency: string) -> f64;
+}
+
+/// Internal interface for tax calculation engine
+interface tax-engine {
+    /// Calculate tax for a given amount and location
+    calculate-vat: func(subtotal: f64, country: string) -> f64;
+}
+
+/// External interface for pricing API
+interface pricing-api {
+    use nebula:core/types.{order, quote};
+    /// Generate a price quote for a given order
+    generate-quote: func(order: order) -> quote;
+}
