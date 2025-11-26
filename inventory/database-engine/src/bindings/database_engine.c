@@ -11,6 +11,31 @@ extern void __wasm_import_wasi_random_random_get_random_bytes(int64_t, uint8_t *
 __attribute__((__import_module__("wasi:random/random@0.2.0"), __import_name__("get-random-u64")))
 extern int64_t __wasm_import_wasi_random_random_get_random_u64(void);
 
+// Imported Functions from `wasi:io/poll@0.2.0`
+
+__attribute__((__import_module__("wasi:io/poll@0.2.0"), __import_name__("[method]pollable.ready")))
+extern int32_t __wasm_import_wasi_io_poll_method_pollable_ready(int32_t);
+
+__attribute__((__import_module__("wasi:io/poll@0.2.0"), __import_name__("[method]pollable.block")))
+extern void __wasm_import_wasi_io_poll_method_pollable_block(int32_t);
+
+__attribute__((__import_module__("wasi:io/poll@0.2.0"), __import_name__("poll")))
+extern void __wasm_import_wasi_io_poll_poll(uint8_t *, size_t, uint8_t *);
+
+// Imported Functions from `wasi:clocks/monotonic-clock@0.2.0`
+
+__attribute__((__import_module__("wasi:clocks/monotonic-clock@0.2.0"), __import_name__("now")))
+extern int64_t __wasm_import_wasi_clocks_monotonic_clock_now(void);
+
+__attribute__((__import_module__("wasi:clocks/monotonic-clock@0.2.0"), __import_name__("resolution")))
+extern int64_t __wasm_import_wasi_clocks_monotonic_clock_resolution(void);
+
+__attribute__((__import_module__("wasi:clocks/monotonic-clock@0.2.0"), __import_name__("subscribe-instant")))
+extern int32_t __wasm_import_wasi_clocks_monotonic_clock_subscribe_instant(int64_t);
+
+__attribute__((__import_module__("wasi:clocks/monotonic-clock@0.2.0"), __import_name__("subscribe-duration")))
+extern int32_t __wasm_import_wasi_clocks_monotonic_clock_subscribe_duration(int64_t);
+
 // Exported Functions from `nebula:inventory/database-engine`
 
 
@@ -31,6 +56,41 @@ void database_engine_list_u8_free(database_engine_list_u8_t *ptr) {
   size_t list_len = ptr->len;
   if (list_len > 0) {
     uint8_t *list_ptr = ptr->ptr;
+    for (size_t i = 0; i < list_len; i++) {
+    }
+    free(list_ptr);
+  }
+}
+
+__attribute__((__import_module__("wasi:io/poll@0.2.0"), __import_name__("[resource-drop]pollable")))
+extern void __wasm_import_wasi_io_poll_pollable_drop(int32_t handle);
+
+void wasi_io_poll_pollable_drop_own(wasi_io_poll_own_pollable_t handle) {
+  __wasm_import_wasi_io_poll_pollable_drop(handle.__handle);
+}
+
+void wasi_io_poll_pollable_drop_borrow(wasi_io_poll_borrow_pollable_t handle) {
+  __wasm_import_wasi_io_poll_pollable_drop(handle.__handle);
+}
+
+wasi_io_poll_borrow_pollable_t wasi_io_poll_borrow_pollable(wasi_io_poll_own_pollable_t arg) {
+  return (wasi_io_poll_borrow_pollable_t) { arg.__handle };
+}
+
+void wasi_io_poll_list_borrow_pollable_free(wasi_io_poll_list_borrow_pollable_t *ptr) {
+  size_t list_len = ptr->len;
+  if (list_len > 0) {
+    wasi_io_poll_borrow_pollable_t *list_ptr = ptr->ptr;
+    for (size_t i = 0; i < list_len; i++) {
+    }
+    free(list_ptr);
+  }
+}
+
+void database_engine_list_u32_free(database_engine_list_u32_t *ptr) {
+  size_t list_len = ptr->len;
+  if (list_len > 0) {
+    uint32_t *list_ptr = ptr->ptr;
     for (size_t i = 0; i < list_len; i++) {
     }
     free(list_ptr);
@@ -69,6 +129,43 @@ void wasi_random_random_get_random_bytes(uint64_t len, database_engine_list_u8_t
 uint64_t wasi_random_random_get_random_u64(void) {
   int64_t ret = __wasm_import_wasi_random_random_get_random_u64();
   return (uint64_t) (ret);
+}
+
+bool wasi_io_poll_method_pollable_ready(wasi_io_poll_borrow_pollable_t self) {
+  int32_t ret = __wasm_import_wasi_io_poll_method_pollable_ready((self).__handle);
+  return ret;
+}
+
+void wasi_io_poll_method_pollable_block(wasi_io_poll_borrow_pollable_t self) {
+  __wasm_import_wasi_io_poll_method_pollable_block((self).__handle);
+}
+
+void wasi_io_poll_poll(wasi_io_poll_list_borrow_pollable_t *in, database_engine_list_u32_t *ret) {
+  __attribute__((__aligned__(sizeof(void*))))
+  uint8_t ret_area[(2*sizeof(void*))];
+  uint8_t *ptr = (uint8_t *) &ret_area;
+  __wasm_import_wasi_io_poll_poll((uint8_t *) (*in).ptr, (*in).len, ptr);
+  *ret = (database_engine_list_u32_t) { (uint32_t*)(*((uint8_t **) (ptr + 0))), (*((size_t*) (ptr + sizeof(void*)))) };
+}
+
+wasi_clocks_monotonic_clock_instant_t wasi_clocks_monotonic_clock_now(void) {
+  int64_t ret = __wasm_import_wasi_clocks_monotonic_clock_now();
+  return (uint64_t) (ret);
+}
+
+wasi_clocks_monotonic_clock_duration_t wasi_clocks_monotonic_clock_resolution(void) {
+  int64_t ret = __wasm_import_wasi_clocks_monotonic_clock_resolution();
+  return (uint64_t) (ret);
+}
+
+wasi_clocks_monotonic_clock_own_pollable_t wasi_clocks_monotonic_clock_subscribe_instant(wasi_clocks_monotonic_clock_instant_t when) {
+  int32_t ret = __wasm_import_wasi_clocks_monotonic_clock_subscribe_instant((int64_t) (when));
+  return (wasi_clocks_monotonic_clock_own_pollable_t) { ret };
+}
+
+wasi_clocks_monotonic_clock_own_pollable_t wasi_clocks_monotonic_clock_subscribe_duration(wasi_clocks_monotonic_clock_duration_t when) {
+  int32_t ret = __wasm_import_wasi_clocks_monotonic_clock_subscribe_duration((int64_t) (when));
+  return (wasi_clocks_monotonic_clock_own_pollable_t) { ret };
 }
 
 __attribute__((__export_name__("nebula:inventory/database-engine#get-stock-level")))
