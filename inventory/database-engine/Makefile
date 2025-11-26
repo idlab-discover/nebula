@@ -1,6 +1,6 @@
 .PHONY: fetch bindings build clean
 
-CLANG := ./sdk/bin/clang \
+CLANG := ./sdk/bin/wasm32-wasip2-clang \
 	-mexec-model=reactor
 
 SRC_DIR := src
