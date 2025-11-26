@@ -2,18 +2,20 @@
 
 This document lists the tools and steps needed to build the Nebula workspace (Rust + C/C++ components) and produce WebAssembly (WASM) artifacts, including WASI-targeted builds and WIT interface binding generation.
 
-## Overview
+## Installation
 
 Required tools:
 
 - `make` (build automation)
 - `rustup` / `cargo` (Rust toolchain)
-- `wit-bindgen` (WIT binding generator)
-- `wasm-pkg-tools` (packaging)
+  - `wit-bindgen` (WIT binding generator)
+  - `wasm-pkg-tools` (packaging)
+  - `wac` (to compose components at build-time)
+  - `wasm-tools` (optional, binary inspection, wasm utilities)
 - `wasi-sdk` (to compile C/C++ to WASM)
-- `wasm-tools` (optional, binary inspection, wasm utilities)
+- `wasi-virt` (to virtualize wasi interfaces)
 
-## Rust toolchain
+### Rust toolchain
 
 Install `rustup` (if missing) and a recent Rust toolchain:
 
@@ -32,7 +34,7 @@ rustup target add wasm32-wasi
 
 Note: the workspace references WASI/WIT interfaces. If you specifically need an experimental preview ABI (preview-1/preview-2), consult the runtime/tooling docs you use (Wasmtime/Wasmer/wasip1/wasip2) — the canonical Rust target is `wasm32-wasi`.
 
-## Install WIT / WASM helper tools
+### Install WIT / WASM helper tools
 
 Install `wit-bindgen` (binding generation for WIT interfaces):
 
@@ -46,37 +48,41 @@ Install `wasm-tools` for inspecting and manipulating wasm binaries:
 cargo install wasm-tools
 ```
 
-Install `wasm-pkg-tools` for automatic WIT dependency management and fetching.
+Install `wac` for composing components at build-time:
+
+```bash
+cargo install wac-cli
+```
+
+Install `wasm-pkg-tools` for automatic WIT dependency management and fetching:
 
 ```bash
 cargo install wkg
 ```
 
-```bash
-curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
-```
+Install `wasi-virt` for virtualizing of wasi interfaces (e.g. filesystems):
 
-If you intended a specific `wasm-pkg-tools` project, you can install that tool similarly (via its recommended method).
+```bash
+cargo install --git https://github.com/bytecodealliance/wasi-virt
+```
 
 Verify installs:
 
 ```bash
 wit-bindgen --version
 wasm-tools --version
+wasi-virt --version
+wac --version
 wkg --version
 ```
 
-## WASI SDK (C/C++ -> WASM)
+### Install WASI SDK (C/C++ -> WASM)
 
 To compile C/C++ sources to WASM (WASI target), install the WASI SDK from the official repo:
 
 - Releases: https://github.com/WebAssembly/wasi-sdk/releases
 
 Add `export WASI_SDK_PATH=...` to your shell startup (`~/.profile`, `~/.bashrc`, `~/.zshrc`) if you want it persistent.
-
-## Go Toolchain (Go -> WASM)
-
-- Follow the TinyGo installation instructions to install the TinyGo compiler.
 
 ## Building to WASM
 
@@ -99,14 +105,17 @@ $(WASI_SDK_PATH)/bin/wasm32-wasip2-clang \
 	-mexec-model=reactor $(SRCS) -o component.wasm
 ```
 
-### Building from Go
+## Build and run
 
-```go
-tinygo build -target=wasip2 \                                                   17:13:28
-    -o target/$(OUT)
+After all tools are succesfully installed, the application can be deployed locally as follows (make sure wasmcloud is installed locally as well):
+
+```bash
+make build
+wash up -d
+wash app deploy wadm.yaml
 ```
 
-## WIT ommon workflows
+## WIT common workflows
 
 - Use `wit-bindgen` to generate host or guest bindings from `.wit` files found under `wit/` and each crate's `wit/` directory.
 

@@ -12,9 +12,9 @@ pub fn handle_order_request(req: &Request) -> Response {
 
 	let order = match body {
 		Ok(order) => Order::from(order),
-		Err(_) => {
+		Err(e) => {
 			return Response::json(
-				json!({ "error": "Invalid order format" }),
+				json!({ "error": format!("Invalid order format: {}", e) }),
 				400,
 			);
 		},
