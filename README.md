@@ -1,6 +1,7 @@
 # Nebula Logistics Engine
 
-This application consists of _3 top-level actors_/ Two of them are complex "Black Boxes" composed via wac.
+This application consists of _3 top-level actors_ Two of them are complex "Black Boxes" composed via wac.
+This demo demonstrates how black-box tracing can hide internal performance issues in cloud‑native WebAssembly microservices, and how glass‑box tracing makes those issues visible for faster diagnosis.
 
 ## Actors
 
@@ -47,28 +48,27 @@ Content-Type: application/json
 
 - `inventory-api` (Rust) - an outer shell exposing the main functionality
 - `warehouse-engine` (Rust) - business rules for shipping
-- `database-engine` (C++) - A specialized, highly optimized driver (mocked)
+- `database-engine` (C) - a mocked specialized, poorly optimized driver
 
 ### The `Pricing` actor
 
 - `pricing-api` (Rust) - an outer shell exporting the main functionality
-- `tax-engine` (Typescript) - calculates VAT based on country rules
-- `currency-engine` (Rust) - fetch live currency rates (mocked)
+- `tax-engine` (TinyGo) - calculates VAT based on country rules
+- `currency-engine` (Rust) - a mocked fetch live currency rates fetcher
 
 ## Scenario: "Black Friday Bottleneck"
 
-A request is sent to place an order from a user in _Belgium_. The `tax-engine` inside the `Pricing` actor has a poorly optimized regex
-for belgian postal codes that creates a massive CPU spike, only for Belgian customers.
+A request is sent to place an order from a user in _Belgium_. The `currency-engine` in the `Pricing` actor fetches the conversion rate from an external API. For European customers using EUR, the API call takes longer than expected.
 
 ### Behavior in wasmCloud
 
 The lattice trace looks like this:
 
 - `[2.5s] HTTP POST /order` (Gateway)
-  - `[0.2s] call: check_stock` (Inventory)
-  - `[2.2s] call: calculate_price`
+  - `[0.2s] call: check-stock` (Inventory)
+  - `[2.2s] call: generate-quote` (Pricing)
 
-We know the `Pricing` actor is slow But is it the `pricing-api`, `tax-engine` or `currency-engine`? With black-box tracing,
+We know the `Pricing` actor is slow, but is it the `pricing-api`, `tax-engine` or `currency-engine`? With black-box tracing,
 this is impossible to know _out-of-the-box_.
 
 ### Behavior with Glass-Box tracing
@@ -76,21 +76,21 @@ this is impossible to know _out-of-the-box_.
 The new lattice trace should look like this:
 
 - `[2.5s] HTTP POST /order` (Gateway)
-  - `[0.2s] call: check_stock` (Inventory)
-    - `[0.1s] internal: warehouse-engine.process`
-    - `[0.05s] internal: database-engine.query`
+  - `[0.2s] call: check-stock` (Inventory)
+    - `[0.1s] internal: warehouse-engine.assess-fulfillment`
+      - `[0.05s] internal: database-engine.get-stock-level`
   - `[2.2s] call: calculate_price` (Pricing)
-    - `[0.01s] internal: currency-engine.get-rate`
-    - `[2.15s] internal: tax-engine.calculate-vat`
+    - `[0.01s] internal: currency-engine.get-currency`
+    - `[2.15s] internal: currency-engine.get-rate`
+    - `[0.04s] internal: tax-engine.calculate-vat`
 
 With Glass-Box component tracing, we can more easily pinpoint where exactly the bottleneck is inside a component with build-time composition. The internal component calls can also contain additional metadata regarding to the arguments passed:
 
 ```json
 {
-  "result": 54.58,
+  "result": 0.85,
   "params": {
-    "subtotal": 259.9,
-    "country": "BE"
+    "currency": "EUR"
   }
 }
 ```

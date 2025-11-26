@@ -2,6 +2,7 @@
 
 CLANG := ./sdk/bin/wasm32-wasip2-clang \
 	-mexec-model=reactor
+CLANG_FLAGS :=
 
 SRC_DIR := src
 BINDINGS_DIR := $(SRC_DIR)/bindings

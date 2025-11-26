@@ -1,6 +1,26 @@
 package nebula:core;
 
 interface types {
+    /// Currency enumeration used for price/quote values
+    enum currency {
+        EUR,
+        USD,
+        GBP,
+        JPY,
+        CAD,
+        AUD,
+    }
+
+    /// Countries Nebula operates in
+    enum country {
+        BE,
+        US,
+        UK,
+        JP,
+        CA,
+        AU,
+    }
+
     /// A single item in an order
     record item {
         sku: string,
@@ -12,7 +32,7 @@ interface types {
     record order {
         order-id: string,
         items: list<item>,
-        destination: string,
+        destination: country,
     }
 
     /// A stock entry for an item
@@ -24,9 +44,9 @@ interface types {
 
     /// A price quote for an order
     record quote {
-        subtotal: f32,
-        tax: f32,
-        total: f32,
-        currency: string,
+        subtotal: f64,
+        tax: f64,
+        total: f64,
+        currency: currency,
     }
 }

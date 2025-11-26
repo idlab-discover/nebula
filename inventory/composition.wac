@@ -1,5 +1,5 @@
 // WAC composition for inventory system
-package nebula:inventory-composition;
+package nebula:inventory;
 
 // Instantiate the database-engine component
 let db = new nebula:database-engine { ... };
