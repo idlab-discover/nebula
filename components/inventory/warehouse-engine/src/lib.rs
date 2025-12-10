@@ -15,6 +15,7 @@ wit_bindgen::generate!({
 struct WarehouseEngine;
 
 impl Guest for WarehouseEngine {
+	/// Assess fulfillment for a given item across all warehouses.
 	fn assess_fulfillment(item: Item) -> Vec<Stock> {
 		let warehouses = load_warehouse_slugs().unwrap_or_default();
 

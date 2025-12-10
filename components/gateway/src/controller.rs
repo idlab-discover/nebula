@@ -5,7 +5,6 @@ use crate::nebula::core::types::Order;
 use crate::nebula::inventory::inventory_api;
 use crate::nebula::pricing::pricing_api;
 use crate::schema::{OrderRequest, QuoteResponse};
-use crate::wasi::logging::logging::{Level, log};
 
 pub fn handle_order_request(req: &Request) -> Response {
 	let body = serde_json::from_slice::<OrderRequest>(&req.body);
@@ -69,19 +68,7 @@ pub fn handle_order_request(req: &Request) -> Response {
 		}
 	}
 
-	log(
-		Level::Info,
-		"nebula:gateway/controller",
-		"All items are in stock. Proceeding to quote generation.",
-	);
-
 	let quote = pricing_api::generate_quote(&order);
-
-	log(
-		Level::Info,
-		"nebula:gateway/controller",
-		&format!("Quote generated: {:?}.", quote),
-	);
 
 	Response::json(QuoteResponse::from(quote), 201)
 }

@@ -1,6 +1,5 @@
 use crate::exports::nebula::pricing::pricing_api::{Guest, Order, Quote};
 use crate::nebula::pricing::{currency_engine, tax_engine};
-use crate::wasi::logging::logging::{Level, log};
 
 wit_bindgen::generate!({
 	path: "wit",
@@ -17,12 +16,6 @@ impl Guest for PricingApi {
 		let currency = currency_engine::get_currency(order.destination);
 		let rate = currency_engine::get_rate(currency);
 
-		log(
-			Level::Info,
-			"nebula:pricing/pricing-api",
-			&format!("Generating quote in {:?} with rate {}", currency, rate),
-		);
-
 		// Calculate the subtotal
 		let subtotal = order
 			.items
@@ -31,20 +24,8 @@ impl Guest for PricingApi {
 			.sum::<f64>()
 			* rate;
 
-		log(
-			Level::Info,
-			"nebula:pricing/pricing-api",
-			&format!("Calculated subtotal: {}", subtotal),
-		);
-
 		// Calculate the tax
 		let tax = tax_engine::calculate_vat(subtotal, order.destination);
-
-		log(
-			Level::Info,
-			"nebula:pricing/pricing-api",
-			&format!("Calculated tax: {}", tax),
-		);
 
 		let subtotal = (subtotal * 100.0).round() / 100.0;
 		let tax = (tax * 100.0).round() / 100.0;

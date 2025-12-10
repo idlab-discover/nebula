@@ -1,7 +1,7 @@
 ## Top-level Makefile
 ## Build subprojects and gather artifacts into `bin/`.
 
-SUBDIRS := gateway pricing inventory
+SUBDIRS := components/gateway components/pricing components/inventory
 BIN_DIR := bin
 
 .PHONY: all build clean prepare help
@@ -14,18 +14,17 @@ prepare:
 # otherwise run `make build` (used by `gateway` and simple crates). Then collect generated .wasm files.
 build: prepare
 	@echo "Building inventory (compose)"
-	@$(MAKE) -C inventory compose
-
+	@$(MAKE) -C components/inventory compose
 	@echo "Building pricing (compose)"
-	@$(MAKE) -C pricing compose
+	@$(MAKE) -C components/pricing compose
 
 	@echo "Building gateway (build)"
-	@$(MAKE) -C gateway build
+	@$(MAKE) -C components/gateway build
 
 	@echo "Collecting artifacts into $(BIN_DIR)/"
-	@cp -v inventory/target/inventory.wasm $(BIN_DIR)/
-	@cp -v pricing/target/pricing.wasm $(BIN_DIR)/
-	@cp -v gateway/target/wasm32-wasip2/release/*.wasm $(BIN_DIR)/
+	@cp -v components/inventory/target/inventory.wasm $(BIN_DIR)/
+	@cp -v components/pricing/target/pricing.wasm $(BIN_DIR)/
+	@cp -v components/gateway/target/wasm32-wasip2/release/*.wasm $(BIN_DIR)/
 
 clean:
 	@echo "Cleaning subprojects and removing $(BIN_DIR)/"
