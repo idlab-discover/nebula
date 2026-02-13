@@ -1,0 +1,5 @@
+- Add otel support to components manually
+- Create wasm otel component (code generation enabling context propagation)
+- Extend the wadm manifest syntax to allow build-time linked components
+- Extend wash to generate otel component based on interfaces and compose using wac
+- Look into extending the runtime itself

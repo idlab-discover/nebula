@@ -1,0 +1,11 @@
+interface collector {
+    record raw-span {
+        name: string,
+        trace-id: string,
+        parent-id: string,
+        span-id: string,
+        start-time-ns: u64,
+        end-time-ns: u64,
+    }
+    emit-span: func(span: raw-span);
+}

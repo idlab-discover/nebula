@@ -2,7 +2,7 @@ pub mod warehouse;
 
 use crate::{
 	exports::nebula::inventory::warehouse_engine::{Guest, Item, Stock},
-	nebula::inventory::database_engine::get_stock_level,
+	nebula::inventory::database_engine,
 	warehouse::load_warehouse_slugs,
 };
 
@@ -23,7 +23,8 @@ impl Guest for WarehouseEngine {
 			.iter()
 			.map(|warehouse_id| {
 				let sku = item.sku.clone();
-				let quantity = get_stock_level(&sku, warehouse_id);
+				let quantity =
+					database_engine::get_stock_level(&sku, warehouse_id);
 				Stock { sku, quantity, warehouse_id: warehouse_id.clone() }
 			})
 			.collect()

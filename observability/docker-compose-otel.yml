@@ -9,6 +9,7 @@ services:
       - GF_AUTH_DISABLE_LOGIN_FORM=true
     volumes:
       - ./config/grafana-datasources.yaml:/etc/grafana/provisioning/datasources/datasources.yaml
+      - grafana-data:/var/lib/grafana
     depends_on:
       - loki
       - prometheus
@@ -59,3 +60,7 @@ services:
     ports:
       - 4318 # This port is used for sending traces from otel-collector to tempo
       - 7999:7999 # tempo
+
+
+volumes:
+  grafana-data:

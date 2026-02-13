@@ -14,15 +14,15 @@ use std::{
 #[command(author = "Ewout Verlinde", version = "0.1.0", about = "Simulate clients creating orders on a distributed wasm application", long_about = None)]
 struct Cli {
     /// Background rate (lambda0)
-    #[arg(short, long, default_value = "20")]
+    #[arg(short, long, default_value = "4")]
     rate: f64,
 
     /// Self-excitation factor (alpha)
-    #[arg(short, long, default_value = "1.0")]
+    #[arg(short, long, default_value = "0.45")]
     alpha: f64,
 
     /// Decay rate (beta)
-    #[arg(short, long, default_value = "2.0")]
+    #[arg(short, long, default_value = "0.5")]
     decay: f64,
 
     /// Stop after N seconds

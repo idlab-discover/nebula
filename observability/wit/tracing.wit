@@ -1,0 +1,30 @@
+package nebula:tracing;
+
+interface context-handler {
+    record span-context {
+        trace-id: string,
+        parent-span-id: string,
+        current-span-id: string,
+    }
+
+    record span-record {
+        name: string,
+        start-time-ns: u64,
+        end-time-ns: u64,
+        span-id: string,
+        parent-id: string,
+        attributes: list<tuple<string, string>>,
+    }
+
+    /// Sub-Proxies call this to get the IDs
+    get-context: func() -> span-context;
+
+    /// Sub-Proxies call this to "save" their span locally in Wasm memory
+    push-span: func(span: span-record);
+
+    /// Root Proxy calls this to get all collected spans for the current request
+    flush-spans: func() -> list<span-record>;
+
+    /// Root Proxy calls this to set the initial IDs
+    set-context: func(context: span-context);
+}

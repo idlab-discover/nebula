@@ -1,0 +1,27 @@
+/// Worlds for interface proxies statically linked into components.
+/// Optimized by offloading trace emission to a collector capability provider.
+
+/// Extracts trace from host and seeds the internal sub-proxies.
+world root-proxy {
+    import wasi:http/types@0.2.0;
+    import wasi:env/environment@0.2.0;
+    import nebula:tracing/collector;
+
+    export nebula:tracing/context-handler;
+
+    // The "Sandwich": It intercepts the inter-component call
+    // Example for nebula:inventory:
+    // import nebula:inventory/api;
+    // export nebula:inventory/api;
+}
+
+world sub-proxy {
+    import nebula:tracing/context-handler;
+
+    // The "Sandwich": It intercepts the inra-component calls
+    // Example for the Tax Engine:
+    // import nebula:inventory/warehouse-engine;
+    // export nebula:inventory/warehouse-engine;
+    // import nebula:inventory/database-engine;
+    // export nebula:inventory/database-engine;
+}

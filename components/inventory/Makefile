@@ -24,13 +24,13 @@ compose: clean build-deps target
 	  --dep nebula:database-engine=$(DB_DIR)/target/database_engine.wasm \
 	  --dep nebula:warehouse-engine=$(WH_DIR)/target/wasm32-wasip2/release/warehouse_engine.wasm \
 	  --dep nebula:inventory-api=$(API_DIR)/target/wasm32-wasip2/release/inventory_api.wasm \
-	  -o $(UNVIRT_OUT)
+	  -o $(VIRT_OUT)
 	$(MAKE) virt
 
 virt:
 	@echo Virtualizing WASM module...
-	wasi-virt "$(UNVIRT_OUT)" --allow-all --preopen /=./config -o "$(VIRT_OUT)"
-	rm $(UNVIRT_OUT)
+# 	wasi-virt "$(UNVIRT_OUT)" --allow-all -o "$(VIRT_OUT)"
+# 	rm $(UNVIRT_OUT)
 
 target:
 	@mkdir -p target

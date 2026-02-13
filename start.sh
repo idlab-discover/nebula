@@ -4,23 +4,20 @@ set -e
 
 # Cleanup function to gracefully shut down
 cleanup() {
-    echo ""
-    echo "Shutting down wasmCloud gracefully..."
-    wash down
+    echo "Shutting down..."
+    docker compose -f observability/docker-compose-otel.yml down
     exit 0
 }
 
 # Trap SIGINT (Ctrl+C) and SIGTERM
 trap cleanup SIGINT SIGTERM
 
-# Export observability settings
-export WASMCLOUD_OBSERVABILITY_ENABLED="true"
-export OTEL_EXPORTER_OTLP_ENDPOINT=http://localhost:4318
-export OTEL_TRACES_EXPORTER=otlp
-
 # Start wasmCloud
-echo "Starting wasmCloud..."
+echo "Starting..."
+docker compose -f observability/docker-compose-otel.yml up -d --wait
+WASMCLOUD_OBSERVABILITY_ENABLED="true" \
+OTEL_EXPORTER_OTLP_ENDPOINT="http://127.0.0.1:4318" \
+OTEL_TRACES_EXPORTER="otlp" \
+OTEL_METRICS_EXPORTER="otlp" \
+OTEL_LOGS_EXPORTER="otlp" \
 wash up
-
-# Keep the script running
-wait
