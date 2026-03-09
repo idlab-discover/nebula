@@ -1,8 +1,0 @@
-package nebula:pricing-api;
-
-world pricing-api {
-    import nebula:pricing/currency-engine;
-    import nebula:pricing/tax-engine;
-    import wasi:logging/logging@0.1.0-draft;
-    export nebula:pricing/pricing-api;
-}

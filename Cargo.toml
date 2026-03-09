@@ -1,0 +1,10 @@
+[package]
+name = "nebula"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+anyhow = "1.0.102"
+clap = { version = "4.5.60", features = ["derive"] }
+tokio = { version = "1.50.0", features = ["macros", "rt-multi-thread"] }
+wirm = "3.0.1"

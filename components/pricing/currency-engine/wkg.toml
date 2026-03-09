@@ -1,3 +1,0 @@
-[overrides]
-"nebula:core" = { path = "../../wit" }
-"nebula:pricing" = { path = "../wit" }

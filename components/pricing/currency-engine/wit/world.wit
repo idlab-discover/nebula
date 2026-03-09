@@ -1,8 +1,0 @@
-package nebula:currency-engine;
-
-world currency-engine {
-    import wasi:random/random@0.2.0;
-    import wasi:clocks/monotonic-clock@0.2.0;
-    import wasi:io/poll@0.2.0;
-    export nebula:pricing/currency-engine;
-}

@@ -1,7 +1,0 @@
-package nebula:inventory-api;
-
-world inventory-api {
-    import nebula:inventory/warehouse-engine;
-    import wasi:logging/logging@0.1.0-draft;
-    export nebula:inventory/inventory-api;
-}

@@ -1,5 +1,0 @@
-package nebula:tax-engine;
-
-world tax-engine {
-    export nebula:pricing/tax-engine;
-}
