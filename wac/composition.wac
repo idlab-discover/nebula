@@ -1,0 +1,11 @@
+package nebula:orders;
+
+let service = new nebula:service { ... };
+
+let gateway = new nebula:gateway {
+    "nebula:service/orders": service["nebula:service/orders"],
+    "nebula:service/quotes": service["nebula:service/quotes"],
+    ...
+};
+
+export gateway.incoming-handler;

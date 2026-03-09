@@ -1,0 +1,17 @@
+package nebula:gateway;
+
+world gateway {
+    include wasi:cli/imports@0.2.10;
+    import wasi:logging/logging@0.1.0-draft;
+
+    import wasi:otel/types@0.3.0;
+    import wasi:otel/tracing@0.3.0;
+    // import wasi:otel/types@0.3.0;
+    // import wasi:otel/tracing@0.3.0;
+
+    import nebula:core/types;
+    import nebula:service/orders;
+    import nebula:service/quotes;
+
+    export wasi:http/incoming-handler@0.2.10;
+}

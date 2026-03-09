@@ -1,0 +1,8 @@
+[workspace]
+resolver = "3"
+members = ["crates/gateway", "crates/otel", "crates/service"]
+
+[workspace.dependencies]
+serde = { version = "*" }
+serde_json = { version = "*" }
+wit-bindgen = { version = "*" }

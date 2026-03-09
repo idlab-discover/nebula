@@ -1,0 +1,5 @@
+package nebula:http-framework;
+
+world framework {
+    import wasi:http/types@0.2.10;
+}
