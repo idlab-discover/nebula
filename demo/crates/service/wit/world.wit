@@ -1,0 +1,28 @@
+package nebula:service;
+
+interface orders {
+    use nebula:core/types.{order, quote};
+
+    create-order: func(order: order) -> quote;
+    read-order: func(order-id: string) -> option<order>;
+    delete-order: func(order-id: string);
+}
+
+interface quotes {
+    use nebula:core/types.{order, quote};
+
+    read-quote: func(order-id: string) -> option<quote>;
+    delete-quote: func(order-id: string);
+}
+
+world service {
+    include wasi:cli/imports@0.2.10;
+
+    import wasi:otel/types@0.3.0;
+    import wasi:otel/tracing@0.3.0;
+    // import wasi:otel/types@0.3.0;
+    // import wasi:otel/tracing@0.3.0;
+
+    export orders;
+    export quotes;
+}

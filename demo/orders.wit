@@ -1,0 +1,344 @@
+package root:component;
+
+world root {
+  import wasi:otel/types@0.3.0;
+  import wasi:clocks/wall-clock@0.2.10;
+  import wasi:otel/tracing@0.3.0;
+  import wasi:cli/environment@0.2.10;
+  import wasi:cli/exit@0.2.10;
+  import wasi:io/error@0.2.10;
+  import wasi:io/streams@0.2.10;
+  import wasi:cli/stderr@0.2.10;
+  import wasi:random/random@0.2.10;
+  import nebula:core/types;
+  import wasi:random/insecure-seed@0.2.10;
+  import wasi:http/types@0.2.10;
+
+  export wasi:http/incoming-handler@0.2.10;
+}
+package wasi:clocks@0.2.10 {
+  interface wall-clock {
+    record datetime {
+      seconds: u64,
+      nanoseconds: u32,
+    }
+
+    now: func() -> datetime;
+  }
+}
+
+
+package wasi:otel@0.3.0 {
+  interface types {
+    type key = string;
+
+    type value = string;
+
+    record key-value {
+      key: key,
+      value: value,
+    }
+
+    record instrumentation-scope {
+      name: string,
+      version: option<string>,
+      schema-url: option<string>,
+      attributes: list<key-value>,
+    }
+  }
+  interface tracing {
+    use wasi:clocks/wall-clock@0.2.10.{datetime};
+    use types.{key-value, instrumentation-scope};
+
+    type trace-id = string;
+
+    type span-id = string;
+
+    flags trace-flags {
+      sampled,
+    }
+
+    type trace-state = list<tuple<string, string>>;
+
+    record span-context {
+      trace-id: trace-id,
+      span-id: span-id,
+      trace-flags: trace-flags,
+      is-remote: bool,
+      trace-state: trace-state,
+    }
+
+    enum span-kind {
+      client,
+      server,
+      producer,
+      consumer,
+      internal,
+    }
+
+    record event {
+      name: string,
+      time: datetime,
+      attributes: list<key-value>,
+    }
+
+    record link {
+      span-context: span-context,
+      attributes: list<key-value>,
+    }
+
+    variant status {
+      unset,
+      ok,
+      error(string),
+    }
+
+    record span-data {
+      span-context: span-context,
+      parent-span-id: string,
+      span-kind: span-kind,
+      name: string,
+      start-time: datetime,
+      end-time: datetime,
+      attributes: list<key-value>,
+      events: list<event>,
+      links: list<link>,
+      status: status,
+      instrumentation-scope: instrumentation-scope,
+      dropped-attributes: u32,
+      dropped-events: u32,
+      dropped-links: u32,
+    }
+
+    on-start: func(context: span-context);
+
+    on-end: func(span: span-data);
+
+    inner-span-context: func() -> span-context;
+  }
+}
+
+
+package wasi:io@0.2.10 {
+  interface error {
+    resource error {
+      to-debug-string: func() -> string;
+    }
+  }
+  interface streams {
+    use error.{error};
+
+    resource output-stream {
+      blocking-write-and-flush: func(contents: list<u8>) -> result<_, stream-error>;
+    }
+
+    variant stream-error {
+      last-operation-failed(error),
+      closed,
+    }
+
+    resource input-stream {
+      blocking-read: func(len: u64) -> result<list<u8>, stream-error>;
+    }
+  }
+}
+
+
+package wasi:cli@0.2.10 {
+  interface environment {
+    get-environment: func() -> list<tuple<string, string>>;
+  }
+  interface exit {
+    exit: func(status: result);
+  }
+  interface stderr {
+    use wasi:io/streams@0.2.10.{output-stream};
+
+    get-stderr: func() -> output-stream;
+  }
+}
+
+
+package wasi:random@0.2.10 {
+  interface random {
+    get-random-u64: func() -> u64;
+  }
+  interface insecure-seed {
+    insecure-seed: func() -> tuple<u64, u64>;
+  }
+}
+
+
+package nebula:core {
+  interface types {
+    record item {
+      sku: string,
+      quantity: u32,
+      unit-price: f64,
+    }
+
+    enum country {
+      BE,
+      US,
+      UK,
+      JP,
+      CA,
+      AU,
+    }
+
+    record order {
+      order-id: string,
+      items: list<item>,
+      destination: country,
+    }
+
+    enum currency {
+      EUR,
+      USD,
+      GBP,
+      JPY,
+      CAD,
+      AUD,
+    }
+
+    record quote {
+      order-id: string,
+      subtotal: f64,
+      tax: f64,
+      total: f64,
+      currency: currency,
+    }
+  }
+}
+
+
+package wasi:http@0.2.10 {
+  interface types {
+    use wasi:io/streams@0.2.10.{input-stream, output-stream};
+
+    resource incoming-body {
+      %stream: func() -> result<input-stream>;
+    }
+
+    resource outgoing-body {
+      write: func() -> result<output-stream>;
+      finish: static func(this: outgoing-body, trailers: option<trailers>) -> result<_, error-code>;
+    }
+
+    resource fields {
+      constructor();
+      append: func(name: field-name, value: field-value) -> result<_, header-error>;
+      entries: func() -> list<tuple<field-name, field-value>>;
+    }
+
+    type trailers = fields;
+
+    record DNS-error-payload {
+      rcode: option<string>,
+      info-code: option<u16>,
+    }
+
+    record TLS-alert-received-payload {
+      alert-id: option<u8>,
+      alert-message: option<string>,
+    }
+
+    record field-size-payload {
+      field-name: option<string>,
+      field-size: option<u32>,
+    }
+
+    variant error-code {
+      DNS-timeout,
+      DNS-error(DNS-error-payload),
+      destination-not-found,
+      destination-unavailable,
+      destination-IP-prohibited,
+      destination-IP-unroutable,
+      connection-refused,
+      connection-terminated,
+      connection-timeout,
+      connection-read-timeout,
+      connection-write-timeout,
+      connection-limit-reached,
+      TLS-protocol-error,
+      TLS-certificate-error,
+      TLS-alert-received(TLS-alert-received-payload),
+      HTTP-request-denied,
+      HTTP-request-length-required,
+      HTTP-request-body-size(option<u64>),
+      HTTP-request-method-invalid,
+      HTTP-request-URI-invalid,
+      HTTP-request-URI-too-long,
+      HTTP-request-header-section-size(option<u32>),
+      HTTP-request-header-size(option<field-size-payload>),
+      HTTP-request-trailer-section-size(option<u32>),
+      HTTP-request-trailer-size(field-size-payload),
+      HTTP-response-incomplete,
+      HTTP-response-header-section-size(option<u32>),
+      HTTP-response-header-size(field-size-payload),
+      HTTP-response-body-size(option<u64>),
+      HTTP-response-trailer-section-size(option<u32>),
+      HTTP-response-trailer-size(field-size-payload),
+      HTTP-response-transfer-coding(option<string>),
+      HTTP-response-content-coding(option<string>),
+      HTTP-response-timeout,
+      HTTP-upgrade-failed,
+      HTTP-protocol-error,
+      loop-detected,
+      configuration-error,
+      internal-error(option<string>),
+    }
+
+    resource incoming-request {
+      method: func() -> method;
+      path-with-query: func() -> option<string>;
+      headers: func() -> headers;
+      consume: func() -> result<incoming-body>;
+    }
+
+    variant method {
+      get,
+      head,
+      post,
+      put,
+      delete,
+      connect,
+      options,
+      trace,
+      patch,
+      other(string),
+    }
+
+    type headers = fields;
+
+    resource outgoing-response {
+      constructor(headers: headers);
+      set-status-code: func(status-code: status-code) -> result;
+      body: func() -> result<outgoing-body>;
+    }
+
+    type status-code = u16;
+
+    resource response-outparam {
+      set: static func(param: response-outparam, response: result<outgoing-response, error-code>);
+    }
+
+    type field-key = string;
+
+    type field-name = string;
+
+    type field-value = list<u8>;
+
+    variant header-error {
+      invalid-syntax,
+      forbidden,
+      immutable,
+    }
+  }
+  interface incoming-handler {
+    use types.{incoming-request, response-outparam};
+
+    handle: func(request: incoming-request, response-out: response-outparam);
+  }
+}

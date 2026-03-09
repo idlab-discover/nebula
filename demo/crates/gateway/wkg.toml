@@ -1,0 +1,4 @@
+[overrides]
+"nebula:core" = { path = "../../wit" }
+"nebula:service" = { path = "../service/wit" }
+"wasi:otel" = { path = "/home/ewout/ugent/thesis/projects/wash/crates/wash-runtime/wit/wasi-otel" }

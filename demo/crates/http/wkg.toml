@@ -1,0 +1,2 @@
+[overrides]
+"wasi:otel" = { path = "/home/ewout/ugent/thesis/projects/wash/crates/wash-runtime/wit/wasi-otel" }

@@ -1,0 +1,14 @@
+[package]
+name = "gateway"
+version = "0.1.0"
+edition = "2024"
+
+[lib]
+crate-type = ["cdylib"]
+
+[dependencies]
+serde = { version = "*" }
+serde_json = { version = "*" }
+wit-bindgen = { version = "*" }
+wasi-http-framework = { path = "../http" }
+wasi-otel-framework = { path = "../otel" }

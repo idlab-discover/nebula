@@ -1,0 +1,13 @@
+services:
+  aspire-dashboard:
+    image: mcr.microsoft.com/dotnet/aspire-dashboard:9.0
+    ports:
+      - 18888:18888  # Dashboard UI
+      - 4317:18889   # OTLP gRPC
+      - 4318:18890   # OTLP HTTP
+    environment:
+      - DASHBOARD__OTLP__GRPCENDPOINTURL=http://0.0.0.0:18889
+      - DASHBOARD__OTLP__HTTPENDPOINTURL=http://0.0.0.0:18890
+      - DASHBOARD__FRONTEND__ENDPOINTURL=http://0.0.0.0:18888
+      - DASHBOARD__FRONTEND__AUTHMODE=Unsecured
+    restart: unless-stopped
