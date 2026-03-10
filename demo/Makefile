@@ -10,7 +10,7 @@ build:
 	cargo build --release --target wasm32-wasip2
 
 fetch:
-	@$(foreach m,$(MEMBERS) otel, \
+	@$(foreach m,$(MEMBERS) otel http, \
 		echo "Fetching WIT for $(m)..."; \
 		cd crates/$(m) && wkg wit fetch; \
 		cd ../..; \
