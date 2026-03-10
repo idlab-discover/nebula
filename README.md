@@ -12,7 +12,7 @@ It works by generating a **proxy component** that mirrors every import and expor
 
 The `wasi:otel/tracing` interface is the standard mechanism for WebAssembly components to emit OpenTelemetry spans. A component calls `on-start` to open a span and `on-end` to close it; both are handled by the host runtime.
 
-A fundamental problem arises with **static composition** (e.g. components linked with [`wac`](https://github.com/bytecodealliance/wac)): the original `wasi:otel@0.2.0-rc.2` proposal exposed only `outer-span-context`, which always returns the host's outermost span context, not the innermost span currently active across component boundaries. When component A starts a span and then calls into component B, B has no way to discover A's span and therefore cannot establish the correct parent-child relationship. The resulting trace loses causality.
+A fundamental problem arises with **static composition** (e.g. components linked with [`wac`](https://github.com/bytecodealliance/wac)): the original [`wasi:otel@0.2.0-rc.2`](https://github.com/WebAssembly/wasi-otel/blob/7e6d50d0b8482944a2c245617736f22d80560fc5/wit/tracing.wit#L1) proposal exposed only `outer-span-context`, which always returns the host's outermost span context, not the innermost span currently active across logical component boundaries. When component A starts a span and then calls into component B, B has no way to discover A's span and therefore cannot establish the correct parent-child relationship. The resulting trace loses causality.
 
 ### The `inner-span-context` proposal
 
@@ -27,7 +27,7 @@ The host maintains a **stack** of active span contexts:
 
 - `on-start` pushes a new context.
 - `on-end` pops it.
-- `inner-span-context` returns the top of the stacl: the innermost currently-active span, regardless of which component started it.
+- `inner-span-context` returns the top of the stack: the innermost currently-active span, regardless of which component started it.
 
 This restores correct parent-child tracing across static composition boundaries, which is a prerequisite for automatic instrumentation of composed components to produce meaningful traces.
 
