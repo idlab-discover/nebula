@@ -1,2 +1,2 @@
 [overrides]
-# "wasi:otel" = { path = "../../../wit/wasi-otel" }
+"wasi:otel" = { path = "../../../wit/wasi-otel" }
