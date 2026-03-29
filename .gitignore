@@ -1,3 +1,4 @@
 # Project build files and dependencies
 **/target/
 **/wit/deps/
+**/tmp

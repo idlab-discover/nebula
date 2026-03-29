@@ -1,0 +1,8 @@
+package wasi:otel@0.3.0;
+
+world imports {
+    import types;
+    import tracing;
+    import metrics;
+    import logs;
+}

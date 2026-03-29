@@ -1,0 +1,10 @@
+package nebula:playground;
+
+interface logging {
+    log: func(msg: string);
+}
+
+world child {
+    import wasi:logging/logging@0.1.0-draft;
+    export logging;
+}

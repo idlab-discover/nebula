@@ -1,9 +1,9 @@
-mod instrument;
+pub mod instrument;
 
 use anyhow::Result;
 use clap::{Parser, Subcommand};
 
-use crate::cli::instrument::InstrumentCommand;
+use crate::command::instrument::InstrumentCommand;
 
 #[derive(Parser)]
 #[command(name = "nebula", version, about)]
@@ -14,7 +14,7 @@ pub struct NebulaCli {
 
 /// A trait that defines the interface for all CLI commands
 pub trait CliCommand {
-	async fn handle(&self) -> Result<()>;
+	fn handle(&self) -> Result<()>;
 }
 
 #[derive(Subcommand)]
@@ -27,9 +27,9 @@ pub enum NebulaCliCommand {
 }
 
 impl CliCommand for NebulaCliCommand {
-	async fn handle(&self) -> Result<()> {
+	fn handle(&self) -> Result<()> {
 		match self {
-			NebulaCliCommand::Instrument(cmd) => cmd.handle().await,
+			NebulaCliCommand::Instrument(cmd) => cmd.handle(),
 		}
 	}
 }

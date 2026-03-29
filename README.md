@@ -1,10 +1,8 @@
-# PoC / Nebula
+# PoC / Nebula (WIP)
 
 **nebula** is a CLI tool that automatically instruments arbitrary WebAssembly components with [OpenTelemetry](https://opentelemetry.io/) tracing via the `wasi:otel` interface, with no changes required to the component's source code.
 
 It works by generating a **proxy component** that mirrors every import and export of the target component, and injects `wasi:otel` entry/exit spans around each proxied function call. The original component is left unmodified; the proxy wraps it at the composed-component level.
-
-> **Status:** active development. The `instrument` command currently parses a component's imports and exports. Proxy generation and `wasi:otel` injection are in progress.
 
 ## Background
 
@@ -33,13 +31,35 @@ This restores correct parent-child tracing across static composition boundaries,
 
 ## Usage
 
+Instruments WebAssembly components by generating a proxy wrapper that adds logging and tracing capabilities to all exported interfaces.
+
+### Arguments
+
 ```sh
-nebula instrument --file path/to/component.wasm
+nebula instrument <INPUTS>... [OPTIONS]
 ```
 
-| Flag     | Description                         |
-| -------- | ----------------------------------- |
-| `--file` | Path to the input `.wasm` component |
+| Argument      | Description                                                                       |
+| :------------ | :-------------------------------------------------------------------------------- |
+| `<INPUTS>...` | Path(s) to `.wasm` component files or a directory containing multiple components. |
+
+### Options
+
+| Flag | Long Flag      | Description                                                                   | Default |
+| :--- | :------------- | :---------------------------------------------------------------------------- | :------ |
+| `-o` | `--output-dir` | The directory where the generated proxy source and WIT files will be written. | `./tmp` |
+| `-h` | `--help`       | Print help information.                                                       |         |
+| `-V` | `--version`    | Print version information.                                                    |         |
+
+### Example
+
+```sh
+# Instrument a specific component and output to a custom directory
+nebula instrument ./service.wasm -o ./generated_proxy
+
+# Instrument all components in a folder
+nebula instrument ./bin/components/
+```
 
 ## Building
 
@@ -51,12 +71,11 @@ Requires a Rust toolchain with the version specified in [`rust-toolchain.toml`](
 
 ## Roadmap
 
-- [x] Parse component imports and exports (`wirm`)
-- [ ] Generate proxy component skeleton
-- [ ] Inject `wasi:otel` spans into proxy
-- [ ] Emit composed `.wasm` output
-- [ ] Demo: automatic + manual instrumentation working together
-- [ ] Demo: benchmarks (no tracing / manual / automatic)
+- [x] Generate proxy WIT world
+- [x] Generate proxy WIT world bindings
+- [ ] Generate Rust implementation based on bindings
+- [ ] Emit proxy Wasm
+- [ ] Automatically compose input components + proxy (`wac`)
 
 ## License
 

@@ -1,4 +1,4 @@
 [overrides]
 "nebula:core" = { path = "../../wit" }
 "nebula:service" = { path = "../service/wit" }
-# "wasi:otel" = { path = "../../../wit/wasi-otel" }
+"wasi:otel" = { path = "../../../wit/wasi-otel-0.3.0" }

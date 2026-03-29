@@ -1,11 +1,17 @@
 use clap::Parser;
 
-use crate::cli::{CliCommand, NebulaCli};
+use crate::command::{CliCommand, NebulaCli};
 
-mod cli;
+pub mod command;
+pub mod util;
 
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {
+	// Initialize logging with tracing, using a compact format and no target
+	// field.
+	tracing_subscriber::fmt().with_target(false).compact().init();
+
+	// Parse the command-line arguments and execute the specified command.
 	let cli = NebulaCli::parse();
-	cli.command.handle().await
+	cli.command.handle()
 }
