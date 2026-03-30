@@ -1,27 +1,50 @@
+use std::collections::HashSet;
 use std::path::Path;
 
 use anyhow::{Context, Result, anyhow};
 use wit_parser::decoding::{DecodedWasm, decode};
-use wit_parser::{PackageName, Resolve, WorldId, WorldItem, WorldKey};
+use wit_parser::{
+	PackageId,
+	PackageName,
+	Resolve,
+	WorldId,
+	WorldItem,
+	WorldKey,
+};
 
-/// Emits a WIT file containing the given package WIT text.
-pub fn emit_wit_package(
+use crate::command::instrument::resolve::{
+	ResolvedPackageWit,
+	resolve_custom_package_wit,
+	resolve_wasi_package_wit,
+};
+
+/// Emits local, non-WASI package WIT files from the given package IDs.
+pub async fn emit_custom_packages(
 	output_root: &Path,
-	name: &PackageName,
-	wit_text: &str,
-) -> Result<String> {
-	let dep_name = wit_dependency_dir_name(name);
-	let dep_dir = output_root.join("deps").join(&dep_name);
-	std::fs::create_dir_all(&dep_dir).with_context(|| {
-		format!("failed to create dependency dir {}", dep_dir.display())
-	})?;
+	batches: &[(Vec<PackageId>, Resolve)],
+) -> Result<()> {
+	let mut packages = Vec::new();
+	for (package_ids, resolve) in batches {
+		let mut resolved =
+			resolve_custom_package_wit(package_ids, resolve).await?;
+		packages.append(&mut resolved);
+	}
+	write_packages(output_root, packages)
+}
 
-	let package_file = dep_dir.join("package.wit");
-	std::fs::write(&package_file, wit_text).with_context(|| {
-		format!("failed to write {}", package_file.display())
-	})?;
-
-	Ok(dep_name)
+/// Emits full WASI package WIT files by resolving from configured registries
+/// instead of using stripped local definitions from the decoded component.
+pub async fn emit_wasi_packages(
+	output_root: &Path,
+	batches: &[(Vec<PackageId>, Resolve)],
+) -> Result<()> {
+	let mut packages = Vec::new();
+	for (package_ids, resolve) in batches {
+		let mut resolved =
+			resolve_wasi_package_wit(package_ids, resolve).await?;
+		packages.append(&mut resolved);
+	}
+	write_packages(output_root, packages)
 }
 
 /// Emits a WIT world file that imports and re-exports the given interfaces.
@@ -42,20 +65,12 @@ pub fn emit_wit_world(
 		.join("\n");
 
 	let world_text = format!(
-		r#"package nebula:proxy;
-
-world proxy {{
-	{}
-
-	{}
-}}
-"#,
+		"package nebula:proxy;\n\nworld proxy {{\n{}\n\n{}\n}}\n",
 		imports, exports
 	);
 
 	let world_file = output_root.join("world.wit");
-	std::fs::write(&world_file, &world_text)
-		.with_context(|| format!("failed to write {}", world_file.display()))?;
+	std::fs::write(&world_file, &world_text)?;
 
 	Ok(world_text)
 }
@@ -73,10 +88,7 @@ pub fn decode_to_world(
 	match decoded {
 		DecodedWasm::Component(resolve, world) => Ok((resolve, world)),
 		DecodedWasm::WitPackage(resolve, package) => {
-			let world =
-				resolve.select_world(&[package], None).with_context(|| {
-					"decoded file is a WIT package with no unambiguous world"
-				})?;
+			let world = resolve.select_world(&[package], None)?;
 			Ok((resolve, world))
 		},
 	}
@@ -95,11 +107,14 @@ pub fn get_exported_interface_refs(
 		let WorldItem::Interface { id, .. } = item else {
 			continue;
 		};
+
 		let interface = &resolve.interfaces[*id];
 		let package_id = interface.package.ok_or_else(|| {
 			anyhow!("exported interface is missing package metadata")
 		})?;
+
 		let package = &resolve.packages[package_id].name;
+
 		let interface_name = interface
 			.name
 			.clone()
@@ -110,6 +125,7 @@ pub fn get_exported_interface_refs(
 				}
 			})
 			.ok_or_else(|| anyhow!("exported interface is missing a name"))?;
+
 		refs.push(get_interface_ref(package, &interface_name));
 	}
 
@@ -132,6 +148,8 @@ fn get_interface_ref(package: &PackageName, interface_name: &str) -> String {
 	out
 }
 
+/// Get the directory name to use for a package dependency, including version if
+/// available, and replacing characters that aren't suitable for file paths.
 fn wit_dependency_dir_name(package_name: &PackageName) -> String {
 	let base = format!("{}-{}", package_name.namespace, package_name.name)
 		.replace(':', "-")
@@ -141,4 +159,30 @@ fn wit_dependency_dir_name(package_name: &PackageName) -> String {
 		Some(version) => format!("{}-{}", base, version),
 		None => base,
 	}
+}
+
+fn write_packages(
+	output_root: &Path,
+	packages: Vec<ResolvedPackageWit>,
+) -> Result<()> {
+	let mut seen = HashSet::new();
+
+	for package in packages {
+		let dep_name = wit_dependency_dir_name(&package.package_name);
+		if !seen.insert(dep_name.clone()) {
+			continue;
+		}
+
+		let dep_dir = output_root.join("deps").join(&dep_name);
+		std::fs::create_dir_all(&dep_dir).with_context(|| {
+			format!("failed to create dependency dir {}", dep_dir.display())
+		})?;
+
+		let package_file = dep_dir.join("package.wit");
+		std::fs::write(&package_file, package.wit_text).with_context(|| {
+			format!("failed to write {}", package_file.display())
+		})?;
+	}
+
+	Ok(())
 }

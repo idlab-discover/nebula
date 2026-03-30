@@ -1,0 +1,6 @@
+build:
+  command: "true"
+  component_path: proxied.wasm
+
+dev:
+  wasi_otel: true

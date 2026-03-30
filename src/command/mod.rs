@@ -13,8 +13,8 @@ pub struct NebulaCli {
 }
 
 /// A trait that defines the interface for all CLI commands
-pub trait CliCommand {
-	fn handle(&self) -> Result<()>;
+pub(crate) trait CliCommand {
+	async fn handle(&self) -> Result<()>;
 }
 
 #[derive(Subcommand)]
@@ -27,9 +27,9 @@ pub enum NebulaCliCommand {
 }
 
 impl CliCommand for NebulaCliCommand {
-	fn handle(&self) -> Result<()> {
+	async fn handle(&self) -> Result<()> {
 		match self {
-			NebulaCliCommand::Instrument(cmd) => cmd.handle(),
+			NebulaCliCommand::Instrument(cmd) => cmd.handle().await,
 		}
 	}
 }

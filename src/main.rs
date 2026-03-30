@@ -13,5 +13,5 @@ async fn main() -> anyhow::Result<()> {
 
 	// Parse the command-line arguments and execute the specified command.
 	let cli = NebulaCli::parse();
-	cli.command.handle()
+	cli.command.handle().await
 }
