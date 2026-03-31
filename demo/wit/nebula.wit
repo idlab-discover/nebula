@@ -25,7 +25,7 @@ interface types {
     record item {
         sku: string,
         quantity: u32,
-        unit-price: float64,
+        unit-price: f64,
     }
 
     /// An order with items and destination
@@ -45,9 +45,9 @@ interface types {
     /// A price quote for an order
     record quote {
         order-id: string,
-        subtotal: float64,
-        tax: float64,
-        total: float64,
+        subtotal: f64,
+        tax: f64,
+        total: f64,
         currency: currency,
     }
 }

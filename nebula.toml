@@ -1,0 +1,5 @@
+[package.overrides]
+"nebula:core" = { path = "./demo/wit" }
+"nebula:service" = { path = "./demo/crates/service/wit" }
+"nebula:playground" = { path = "./playground/parent/wit" }
+"wasi:otel" = { path = "./wit/wasi-otel-0.3.0" }

@@ -4,13 +4,21 @@ use anyhow::Result;
 use wac_graph::types::Package;
 use wac_graph::{CompositionGraph, EncodeOptions};
 
-pub fn build_proxy_composition(output_root: &Path) -> Result<()> {
-	let mut graph = CompositionGraph::new();
-	let workspace_root = Path::new(env!("CARGO_MANIFEST_DIR"));
+pub struct RegisteredPackages {
+	pub service: wac_graph::PackageId,
+	pub gateway: wac_graph::PackageId,
+	pub proxy:   wac_graph::PackageId,
+}
 
-	let service_path = workspace_root.join("bin/service.wasm");
-	let gateway_path = workspace_root.join("bin/gateway.wasm");
-	let proxy_path = workspace_root.join("nebula_proxy.wasm");
+pub fn register_proxy_packages(
+	graph: &mut CompositionGraph,
+	workspace_root: &Path,
+	output_root: &Path,
+) -> Result<RegisteredPackages> {
+	let service_path = workspace_root.join("input/service.wasm");
+	let gateway_path = workspace_root.join("input/gateway.wasm");
+	let proxy_path =
+		output_root.join("target/wasm32-wasip2/release/proxy.wasm");
 
 	let service_package = Package::from_file(
 		"nebula:service",
@@ -33,15 +41,22 @@ pub fn build_proxy_composition(output_root: &Path) -> Result<()> {
 		graph.types_mut(),
 	)?;
 
-	let service_package = graph.register_package(service_package)?;
-	let gateway_package = graph.register_package(gateway_package)?;
-	let proxy_package = graph.register_package(proxy_package)?;
+	let service = graph.register_package(service_package)?;
+	let gateway = graph.register_package(gateway_package)?;
+	let proxy = graph.register_package(proxy_package)?;
 
-	let service = graph.instantiate(service_package);
-	let gateway_bootstrap = graph.instantiate(gateway_package);
-	let proxy_service = graph.instantiate(proxy_package);
-	let gateway = graph.instantiate(gateway_package);
-	let proxy_http = graph.instantiate(proxy_package);
+	Ok(RegisteredPackages { service, gateway, proxy })
+}
+
+pub fn wire_proxy_composition(
+	graph: &mut CompositionGraph,
+	packages: &RegisteredPackages,
+) -> Result<()> {
+	let service = graph.instantiate(packages.service);
+	let gateway_bootstrap = graph.instantiate(packages.gateway);
+	let proxy_service = graph.instantiate(packages.proxy);
+	let gateway = graph.instantiate(packages.gateway);
+	let proxy_http = graph.instantiate(packages.proxy);
 
 	// Service exports
 	let service_orders =
@@ -126,6 +141,13 @@ pub fn build_proxy_composition(output_root: &Path) -> Result<()> {
 	)?;
 	graph.export(final_handler, "wasi:http/incoming-handler@0.2.10")?;
 
+	Ok(())
+}
+
+pub fn emit_proxy_composition(
+	graph: &CompositionGraph,
+	output_root: &Path,
+) -> Result<()> {
 	let bytes = graph.encode(EncodeOptions::default())?;
 
 	let output_file = output_root.join("proxied.wasm");

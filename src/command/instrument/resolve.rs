@@ -1,205 +1,130 @@
-use std::time::{SystemTime, UNIX_EPOCH};
-
 use anyhow::{Context, Result, anyhow};
-use tokio::task::JoinSet;
-use wasm_pkg_client::Client;
-use wasm_pkg_client::caching::{CachingClient, FileCache};
-use wasm_pkg_core::resolver::{
-	Dependency,
-	DependencyResolver,
-	RegistryPackage,
+use bytes::Bytes;
+use futures::TryStreamExt;
+use wasm_pkg_client::{
+	caching::{CachingClient, FileCache},
+	Client,
+	PackageRef,
+	Version,
 };
-use wasm_pkg_core::wit::{OutputType, populate_dependencies};
-use wit_component::WitPrinter;
-use wit_parser::{PackageId, PackageName, Resolve, UnresolvedPackageGroup};
+use wit_component::{DecodedWasm, WitPrinter, decode};
+use wit_parser::{PackageName, UnresolvedPackage, UnresolvedPackageGroup};
 
-#[derive(Debug, Clone)]
-pub struct ResolvedPackageWit {
-	pub package_name: PackageName,
-	pub wit_text:     String,
+use crate::config::NebulaConfig;
+
+/// Fetches a package from the local filesystem if an override exists,
+/// otherwise fetches from the registry.
+pub async fn resolve_package(
+	pkg_name: &PackageName,
+	nebula_config: Option<&NebulaConfig>,
+) -> Result<UnresolvedPackage> {
+	let pkg_ref = PackageRef::try_from(format!(
+		"{}:{}",
+		pkg_name.namespace, pkg_name.name
+	))?;
+
+	// Check for an override path in the configuration, and if one exists,
+	// attempt to load the package from that path instead of the registry.
+	let override_path = nebula_config
+		.and_then(|c| c.override_path_for(&pkg_ref.to_string()).cloned());
+
+	if let Some(path) = override_path {
+		let group = UnresolvedPackageGroup::parse_dir(path)?;
+
+		return std::iter::once(&group.main)
+			.chain(&group.nested)
+			.find(|pkg| pkg.name == *pkg_name)
+			.cloned()
+			.ok_or_else(|| {
+				anyhow!("Package {pkg_name} not found in override")
+			});
+	}
+
+	// If no override is found, proceed to fetch the package from the registry.
+	let client = Client::with_global_defaults().await?;
+	let pkg_ver = resolve_registry_version(&client, &pkg_ref, pkg_name).await?;
+	let binary = if let Ok(file_cache) = FileCache::global_cache().await {
+		let caching_client = CachingClient::new(Some(client.clone()), file_cache);
+		let release = caching_client.get_release(&pkg_ref, &pkg_ver).await?;
+		let chunks: Vec<Bytes> = caching_client
+			.get_content(&pkg_ref, &release)
+			.await?
+			.try_collect()
+			.await?;
+		chunks.concat()
+	} else {
+		let release = client.get_release(&pkg_ref, &pkg_ver).await?;
+		let chunks: Vec<Bytes> =
+			client.stream_content(&pkg_ref, &release).await?.try_collect().await?;
+		chunks.concat()
+	};
+
+	decode_registry_wit_package(&binary, pkg_name)
 }
 
-/// Resolves WIT for the given decoded WASM components by emitting local WIT
-/// for non-WASI dependencies.
-pub async fn resolve_custom_package_wit(
-	package_ids: &[PackageId],
-	resolve: &Resolve,
-) -> Result<Vec<ResolvedPackageWit>> {
-	let mut packages = Vec::new();
-	let mut tasks: JoinSet<Result<ResolvedPackageWit>> = JoinSet::new();
-
-	for package_id in package_ids.iter().copied() {
-		let resolve = resolve.clone();
-
-		tasks.spawn_blocking(move || -> Result<ResolvedPackageWit> {
-			let package_name = resolve.packages[package_id].name.clone();
-			let wit_text = {
-				let mut local = resolve;
-				local.packages[package_id].worlds.clear();
-
-				let mut printer = WitPrinter::default();
-				printer.print(&local, package_id, &[])?;
-				printer.output.to_string()
-			};
-
-			Ok(ResolvedPackageWit { package_name, wit_text })
+/// Resolves the version of a package from the registry, using the specified
+/// version if provided, or selecting the best available version otherwise.
+async fn resolve_registry_version(
+	client: &Client,
+	pkg_ref: &PackageRef,
+	pkg_name: &PackageName,
+) -> Result<Version> {
+	if let Some(version) = &pkg_name.version {
+		return Version::parse(&version.to_string()).with_context(|| {
+			format!("invalid package version for `{pkg_name}`")
 		});
 	}
 
-	while let Some(task) = tasks.join_next().await {
-		let package =
-			task.context("custom package resolve task panicked")??;
-		packages.push(package);
-	}
+	// If no version is specified, fetch the list of available versions.
+	let versions = client
+		.list_all_versions(pkg_ref)
+		.await
+		.with_context(|| format!("failed to list versions for `{pkg_name}`"))?;
 
-	Ok(packages)
+	// Select the best available version, preferring non-yanked versions and
+	// using semantic versioning to determine the latest version.
+	let best_version = versions
+		.iter()
+		.filter(|info| !info.yanked)
+		.max_by(|a, b| a.version.cmp(&b.version))
+		.map(|info| info.version.clone())
+		.ok_or_else(|| anyhow!("no non-yanked versions found"));
+
+	best_version
 }
 
-/// Resolves WASI package WIT by fetching from configured registries instead of
-/// using stripped local definitions from the decoded component.
-/// TODO: simplify
-pub async fn resolve_wasi_package_wit(
-	package_ids: &[PackageId],
-	resolve: &Resolve,
-) -> Result<Vec<ResolvedPackageWit>> {
-	if package_ids.is_empty() {
-		return Ok(Vec::new());
-	}
-
-	let cache = FileCache::global_cache()
-		.await
-		.context("failed to initialize wasm-pkg cache")?;
-	let client = Client::with_global_defaults()
-		.await
-		.context("failed to initialize wasm-pkg client")?;
-	let client = CachingClient::new(Some(client), cache);
-
-	let mut resolver = DependencyResolver::new_with_client(client, None)
-		.context("failed to initialize WASI dependency resolver")?;
-
-	for package_id in package_ids {
-		let package_name = &resolve.packages[*package_id].name;
-		if package_name.namespace != "wasi" {
-			continue;
-		}
-
-		let package_ref: wasm_pkg_client::PackageRef =
-			format!("{}:{}", package_name.namespace, package_name.name)
-				.parse()
-				.with_context(|| {
-					format!(
-						"failed to parse package ref {}:{}",
-						package_name.namespace, package_name.name
-					)
-				})?;
-
-		let version_req = package_name
-			.version
-			.as_ref()
-			.map(|version| format!("={version}"))
-			.unwrap_or_else(|| "*".to_string())
-			.parse()
-			.with_context(|| {
-				format!(
-					"failed to parse version requirement for package {}",
-					package_name
-				)
-			})?;
-
-		resolver
-			.add_dependency(
-				&package_ref,
-				&Dependency::Package(RegistryPackage {
-					name:     Some(package_ref.clone()),
-					version:  version_req,
-					registry: None,
-				}),
-			)
-			.await
-			.with_context(|| {
-				format!("failed to add WASI dependency {}", package_ref)
-			})?;
-	}
-
-	let dependency_map = resolver
-		.resolve()
-		.await
-		.context("failed to resolve WASI dependencies from registry")?;
-
-	if dependency_map.is_empty() {
-		return Ok(Vec::new());
-	}
-
-	let ts = SystemTime::now()
-		.duration_since(UNIX_EPOCH)
-		.context("system clock is before UNIX_EPOCH")?
-		.as_nanos();
-	let tmp_root = std::env::temp_dir().join(format!("nebula-wasi-{ts}"));
-	std::fs::create_dir_all(&tmp_root)
-		.with_context(|| format!("failed to create {}", tmp_root.display()))?;
-
-	let placeholder_world = tmp_root.join("world.wit");
-	std::fs::write(
-		&placeholder_world,
-		"package nebula:wasi-resolver;\n\nworld resolver {}\n",
-	)
-	.with_context(|| {
-		format!(
-			"failed to write temporary root world {}",
-			placeholder_world.display()
-		)
+/// Decodes a WIT package from the registry binary content, returning an
+/// `UnresolvedPackage` that can be used for further processing.
+fn decode_registry_wit_package(
+	binary: &[u8],
+	pkg_name: &PackageName,
+) -> Result<UnresolvedPackage> {
+	// Decode the binary content as a WIT package, ensuring that it is valid and
+	// well-formed.
+	let decoded_package = decode(binary).with_context(|| {
+		format!("failed to decode registry package `{pkg_name}` as WIT")
 	})?;
 
-	populate_dependencies(&tmp_root, &dependency_map, OutputType::Wit)
-		.await
-		.context("failed to populate WASI dependencies")?;
-
-	let deps_root = tmp_root.join("deps");
-	let mut packages = Vec::new();
-
-	if deps_root.exists() {
-		for entry in std::fs::read_dir(&deps_root).with_context(|| {
-			format!("failed to read {}", deps_root.display())
-		})? {
-			let entry = entry?;
-			let dep_dir = entry.path();
-			if !dep_dir.is_dir() {
-				continue;
-			}
-
-			let package_file = dep_dir.join("package.wit");
-			if !package_file.exists() {
-				continue;
-			}
-
-			let wit_text = std::fs::read_to_string(&package_file)
-				.with_context(|| {
-					format!("failed to read {}", package_file.display())
-				})?;
-			let parsed =
-				UnresolvedPackageGroup::parse(&package_file, &wit_text)
-					.with_context(|| {
-						format!(
-							"failed to parse generated WIT package {}",
-							package_file.display()
-						)
-					})?;
-
-			packages.push(ResolvedPackageWit {
-				package_name: parsed.main.name,
-				wit_text,
-			});
-		}
-	}
-
-	let _ = std::fs::remove_dir_all(&tmp_root);
-
-	if packages.is_empty() {
+	// Ensure that the decoded package is a WIT package and extract the resolve
+	// and package ID information.
+	let DecodedWasm::WitPackage(resolve, package_id) = decoded_package else {
 		return Err(anyhow!(
-			"no WASI packages were generated under {}",
-			deps_root.display()
+			"registry package `{pkg_name}` was not a WIT package"
 		));
-	}
+	};
 
-	Ok(packages)
+	// Use the WitPrinter to convert the resolved WIT package into a string
+	// format that can be parsed by the UnresolvedPackageGroup parser.
+	let mut printer = WitPrinter::default();
+	printer
+		.print(&resolve, package_id, &[])
+		.with_context(|| format!("failed to print WIT for `{pkg_name}`"))?;
+
+	// Parse the printed WIT output to create an UnresolvedPackageGroup.
+	let unresolved_group = UnresolvedPackageGroup::parse(
+		format!("{pkg_name}.wit"),
+		&printer.output.to_string(),
+	)?;
+
+	Ok(unresolved_group.main)
 }

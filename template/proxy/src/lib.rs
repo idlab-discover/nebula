@@ -14,7 +14,7 @@ impl service_export::orders::Guest for Proxy {
 	) -> service_export::orders::Quote {
 		println!("Creating order: {:?}", order);
 		let order = service_import::orders::Order {
-			order_id: "SKIBIDI IT WORKS!!".to_string(),
+			order_id: "IT WORKS!!".to_string(),
 			..order
 		};
 		let result = service_import::orders::create_order(&order);

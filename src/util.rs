@@ -1,7 +1,7 @@
 use std::path::{Path, PathBuf};
 
 use anyhow::{Result, anyhow};
-use tracing::{debug, warn};
+use tracing::warn;
 use walkdir::WalkDir;
 
 /// Resolves the input paths to a list of .wasm files, scanning directories
@@ -21,7 +21,6 @@ pub fn resolve_input_paths(
 				warn!(path = %root.display(), "Input path does not exist");
 			}
 
-			debug!(path = %root.display(), "Scanning input path");
 			WalkDir::new(root)
 				.into_iter()
 				.filter_map(|e| {
