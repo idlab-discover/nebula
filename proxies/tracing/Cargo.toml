@@ -1,5 +1,5 @@
 [package]
-name = "proxy"
+name = "tracing"
 version = "0.1.0"
 edition = "2024"
 
@@ -7,4 +7,4 @@ edition = "2024"
 crate-type = ["cdylib"]
 
 [dependencies]
-wit-bindgen = { version = "0.54.0", default-features = false }
+wit-bindgen = { version = "0.56.0", features = ["macros", "async"] }

@@ -2,5 +2,8 @@ package nebula:tracing;
 
 world tracing {
     import wasi:otel/tracing@0.3.0;
+    import wasi:random/random@0.2.10;
+
     export splicer:tier1/before@0.1.0;
+    export splicer:tier1/after@0.1.0;
 }
