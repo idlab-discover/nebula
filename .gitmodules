@@ -1,11 +1,11 @@
 [submodule "wirm"]
-	path = wirm
+	path = deps/wirm
 	url = git@github.com:EwoutV/wirm.git
 	branch = experiment/nebula
 [submodule "splicer"]
-	path = splicer
+	path = deps/splicer
 	url = git@github.com:EwoutV/splicer.git
 	branch = experiment/nebula
 [submodule "cviz"]
-	path = cviz
+	path = deps/cviz
 	url = git@github.com:EwoutV/cviz.git

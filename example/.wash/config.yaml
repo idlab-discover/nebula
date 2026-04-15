@@ -1,6 +1,6 @@
 build:
   command: "true"
-  component_path: proxied.wasm
+  component_path: orders-instrumented.wasm
 
 dev:
   wasi_otel: true

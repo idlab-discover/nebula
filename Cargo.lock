@@ -715,9 +715,7 @@ dependencies = [
 
 [[package]]
 name = "cviz"
-version = "2.0.0-rc2"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "19d320dc1ef601e89878d937a49ba82c250a6490f2a861e09a1b0d69b5034397"
+version = "2.0.0-rc3"
 dependencies = [
  "anyhow",
  "clap",
@@ -725,7 +723,7 @@ dependencies = [
  "serde",
  "serde_json",
  "sha2",
- "wirm 4.0.0-rc2",
+ "wirm",
 ]
 
 [[package]]
@@ -2066,6 +2064,7 @@ checksum = "5f98efec8807c63c752b5bd61f862c165c115b0a35685bdcfd9238c7aeb592b7"
 dependencies = [
  "cfg-if",
  "miette-derive",
+ "serde",
  "unicode-width 0.1.14",
 ]
 
@@ -2126,6 +2125,7 @@ dependencies = [
  "anyhow",
  "bytes",
  "clap",
+ "cviz",
  "fs_extra",
  "futures",
  "futures-util",
@@ -2142,6 +2142,8 @@ dependencies = [
  "tracing-error",
  "tracing-subscriber",
  "wac-graph",
+ "wac-parser",
+ "wac-resolver",
  "walkdir",
  "wasm-pkg-client",
  "wasm-pkg-common",
@@ -3664,7 +3666,7 @@ dependencies = [
  "serde_yaml",
  "wasm-encoder 0.245.1",
  "wasmparser 0.245.1",
- "wirm 4.0.0-rc3",
+ "wirm",
 ]
 
 [[package]]
@@ -4302,6 +4304,49 @@ dependencies = [
  "wasm-encoder 0.244.0",
  "wasm-metadata 0.244.0",
  "wasmparser 0.244.0",
+]
+
+[[package]]
+name = "wac-parser"
+version = "0.9.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "18a49edd68c73253e803307147664e024fb0c255705367c9266db269d27d34d4"
+dependencies = [
+ "anyhow",
+ "id-arena",
+ "indexmap 2.13.0",
+ "log",
+ "logos",
+ "miette",
+ "semver",
+ "serde",
+ "thiserror 1.0.69",
+ "wac-graph",
+ "wasm-encoder 0.244.0",
+ "wasm-metadata 0.244.0",
+ "wasmparser 0.244.0",
+]
+
+[[package]]
+name = "wac-resolver"
+version = "0.9.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "0e092ff1de1991a4dec9f6a0b269e70fbf518902285dc9691dcd2bfe5b23e11b"
+dependencies = [
+ "anyhow",
+ "futures",
+ "indexmap 2.13.0",
+ "log",
+ "miette",
+ "semver",
+ "thiserror 1.0.69",
+ "tokio",
+ "wac-parser",
+ "wac-types",
+ "warg-client",
+ "warg-crypto",
+ "warg-protocol",
+ "wit-component 0.244.0",
 ]
 
 [[package]]
@@ -5216,19 +5261,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "a90e88e4667264a994d34e6d1ab2d26d398dcdca8b7f52bec8668957517fc7d8"
 dependencies = [
  "memchr",
-]
-
-[[package]]
-name = "wirm"
-version = "4.0.0-rc2"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "585ce0b634a57b65c534f4cabf49e177158d7078132a45ea0db9075c300a9ece"
-dependencies = [
- "log",
- "serde_json",
- "tempfile",
- "wasm-encoder 0.244.0",
- "wasmparser 0.244.0",
 ]
 
 [[package]]

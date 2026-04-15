@@ -1,6 +1,6 @@
 ### General
 
-- [ ] Pull `wirm`, `splicer` and `wasi-otel` as forked submodules
+- [x] Pull `wirm`, `splicer` and `wasi-otel` as forked submodules
 - [ ] Extend `splicer` rules with glob interface matching
 
 ### Refactor
