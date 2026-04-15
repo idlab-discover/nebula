@@ -1,0 +1,3 @@
+[overrides]
+"splicer:tier1" = { path = "../../deps/splicer/wit/tier1" }
+"wasi:otel" = { path = "../../wit/wasi-otel-0.3.0" }

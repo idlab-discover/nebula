@@ -6,3 +6,6 @@
 	path = splicer
 	url = git@github.com:EwoutV/splicer.git
 	branch = experiment/nebula
+[submodule "cviz"]
+	path = cviz
+	url = git@github.com:EwoutV/cviz.git

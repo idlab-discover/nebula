@@ -1,0 +1,6 @@
+package nebula:tracing;
+
+world tracing {
+    import wasi:otel/tracing@0.3.0;
+    export splicer:tier1/before@0.1.0;
+}
