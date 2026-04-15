@@ -36,6 +36,7 @@ impl Span {
 	#[must_use]
 	pub fn new(name: &str, scope_name: &str) -> Self {
 		let parent_context = tracing::inner_span_context();
+		// let parent_context = tracing::outer_span_context();
 		let span_id = random::get_random_u64();
 
 		let context = SpanContext {
