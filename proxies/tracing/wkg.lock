@@ -3,6 +3,24 @@
 version = 1
 
 [[packages]]
+name = "splicer:tier1"
+registry = "ejrgilbert"
+
+[[packages.versions]]
+requirement = "=0.2.0"
+version = "0.2.0"
+digest = "sha256:b9ab99af8b7b887f6fe0df766370763b7f534221f72233d9d965f7342f90207a"
+
+[[packages]]
+name = "wasi:cli"
+registry = "wasi.dev"
+
+[[packages.versions]]
+requirement = "=0.2.10"
+version = "0.2.10"
+digest = "sha256:0ce8714c597191cf9b7b37c4bd2033a33b086e5af486ac2f1a880308040cad1a"
+
+[[packages]]
 name = "wasi:clocks"
 registry = "wasi.dev"
 
@@ -12,13 +30,13 @@ version = "0.2.0"
 digest = "sha256:51911098e929732f65d1d84f8dc393299f18a9e8de632d854714f37142efe97b"
 
 [[packages]]
-name = "wasi:io"
-registry = "wasi.dev"
+name = "wasi:otel"
+registry = "ewoutv"
 
 [[packages.versions]]
-requirement = "=0.2.0"
-version = "0.2.0"
-digest = "sha256:c33b1dbf050f64229ff4decbf9a3d3420e0643a86f5f0cea29f81054820020a6"
+requirement = "=0.2.0-rc.3"
+version = "0.2.0-rc.3"
+digest = "sha256:6a4d83598b2b52c6e24e8959ba9f860f663ab416ef50a0c45be0bc7d69f84c82"
 
 [[packages]]
 name = "wasi:random"

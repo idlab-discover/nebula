@@ -30,6 +30,6 @@ bytes = "1.11.1"
 serde = "1.0.228"
 toml = "1.1.0"
 splicer = { version = "2.0.0-rc3", path = "deps/splicer" }
-cviz = { version = "2.0.0-rc3", path = "deps/cviz" }
+# cviz = { version = "2.0.0-rc3", path = "deps/cviz" }
 wac-parser = "0.9"
 wac-resolver = "0.9"

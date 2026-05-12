@@ -1,67 +1,67 @@
 mod bindings;
 
-use std::cell::RefCell;
 use std::collections::HashMap;
+use std::sync::{LazyLock, Mutex};
 
 use bindings::exports::splicer::tier1::after::Guest as AfterGuest;
 use bindings::exports::splicer::tier1::before::Guest as BeforeGuest;
-use bindings::wasi::clocks::wall_clock;
 use bindings::wasi::otel::tracing;
 use bindings::wasi::random::random;
 
 use crate::bindings::export;
+use crate::bindings::exports::splicer::tier1::before::CallId;
+use crate::bindings::wasi::clocks0_2_0::wall_clock;
 
 const PACKAGE_NAME: &str = "nebula:tracing";
 
 struct InflightSpan {
-	context: tracing::SpanContext,
-	start_time: wall_clock::Datetime,
+	context:        tracing::SpanContext,
+	start_time:     wall_clock::Datetime,
 	parent_span_id: String,
-	name: String,
+	name:           String,
 }
 
-
-
-thread_local! {
-	static INFLIGHT_SPANS: RefCell<HashMap<String, InflightSpan>> = RefCell::new(HashMap::new());
-}
+/// A global map of in-flight spans, keyed by their span ID.
+/// todo(ewout): This assumes functions behave correctly and close their own
+/// spans, since we use `current_span_context` to find the span to close.
+/// We'd need a `id` on `CallId` and store that in the `InflightSpan` to be more
+/// robust.
+static INFLIGHT_SPANS: LazyLock<Mutex<HashMap<String, InflightSpan>>> =
+	LazyLock::new(|| Mutex::new(HashMap::new()));
 
 struct TracingProxy;
 
 impl BeforeGuest for TracingProxy {
 	/// Called before every invocation of a target-interface function.
 	#[allow(async_fn_in_trait)]
-	async fn before_call(name: String) {
-		// Create a new span context for the call, using the current outer span context as the parent.
-		let parent_context = tracing::inner_span_context();
+	async fn on_call(call: CallId) {
+		// Create a new span context for the call, using the current outer span
+		// context as the parent.
+		let parent_context = tracing::current_span_context();
 		let span_id = format!("{:016x}", random::get_random_u64());
 
 		let context = tracing::SpanContext {
-			trace_id: parent_context.trace_id.clone(),
-			span_id: span_id.clone(),
+			trace_id:    parent_context.trace_id.clone(),
+			span_id:     span_id.clone(),
 			trace_flags: tracing::TraceFlags::SAMPLED,
-			is_remote: true,
+			is_remote:   true,
 			trace_state: parent_context.trace_state.clone(),
 		};
 
-		let start_time =  wall_clock::now();
+		let start_time = wall_clock::now();
 		let parent_span_id = parent_context.span_id;
+		let name = format!("{}/{}", call.interface_name, call.function_name);
 
-		INFLIGHT_SPANS.with(|spans| {
-			let mut spans = spans.borrow_mut();
+		let inflight_span = InflightSpan {
+			context: context.clone(),
+			parent_span_id: parent_span_id.clone(),
+			start_time,
+			name,
+		};
 
-			let inflight_span = InflightSpan {
-				context: context.clone(),
-				parent_span_id: parent_span_id.clone(),
-				start_time,
-				name: name.clone(),
-			};
-
-			spans.insert(
-				span_id,
-				inflight_span,
-			);
-		});
+		if let Ok(mut spans) = INFLIGHT_SPANS.lock() {
+			spans.insert(span_id, inflight_span);
+		}
 
 		tracing::on_start(&context);
 	}
@@ -70,15 +70,16 @@ impl BeforeGuest for TracingProxy {
 impl AfterGuest for TracingProxy {
 	/// Called after every invocation of a target-interface function.
 	#[allow(async_fn_in_trait)]
-	async fn after_call(_name: String) {
-		let current_context = tracing::inner_span_context();
+	async fn on_return(_call: CallId) {
+		let current_context = tracing::current_span_context();
 		let end_time = wall_clock::now();
 
-		let inflight = INFLIGHT_SPANS.with(|spans| spans.borrow_mut().remove(
-			&current_context.span_id));
+		let inflight: Option<InflightSpan> = INFLIGHT_SPANS
+			.lock()
+			.ok()
+			.and_then(|mut spans| spans.remove(&current_context.span_id));
 
 		let Some(inflight) = inflight else {
-			// This can happen if the guest calls `tracing::on_end` itself, in which case we won't have an inflight span for it.
 			return;
 		};
 
@@ -94,8 +95,8 @@ impl AfterGuest for TracingProxy {
 			links: vec![],
 			status: tracing::Status::Unset,
 			instrumentation_scope: tracing::InstrumentationScope {
-				name: PACKAGE_NAME.to_string(),
-				version: None,
+				name:       PACKAGE_NAME.to_string(),
+				version:    None,
 				schema_url: None,
 				attributes: vec![],
 			},

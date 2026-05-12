@@ -1,0 +1,50 @@
+package example:composition;
+
+let service = new my:service {
+    ...
+};
+
+let tracing = new my:tracing { ... };
+
+let tracing-adapter-nebula-service-quotes = new my:tracing-adapter-nebula-service-quotes {
+    "nebula:service/quotes": service["nebula:service/quotes"],
+    "splicer:tier1/before@0.2.0": tracing["splicer:tier1/before@0.2.0"],
+    "splicer:tier1/after@0.2.0": tracing["splicer:tier1/after@0.2.0"],
+    ...
+};
+
+let tracing-adapter-nebula-service-quotes = new my:tracing-adapter-nebula-service-quotes {
+    "nebula:service/quotes": tracing-adapter-nebula-service-quotes["nebula:service/quotes"],
+    "splicer:tier1/before@0.2.0": tracing["splicer:tier1/before@0.2.0"],
+    "splicer:tier1/after@0.2.0": tracing["splicer:tier1/after@0.2.0"],
+    ...
+};
+
+let tracing-adapter-nebula-service-orders = new my:tracing-adapter-nebula-service-orders {
+    "nebula:service/orders": service["nebula:service/orders"],
+    "splicer:tier1/before@0.2.0": tracing["splicer:tier1/before@0.2.0"],
+    "splicer:tier1/after@0.2.0": tracing["splicer:tier1/after@0.2.0"],
+    ...
+};
+
+let tracing-adapter-nebula-service-orders = new my:tracing-adapter-nebula-service-orders {
+    "nebula:service/orders": tracing-adapter-nebula-service-orders["nebula:service/orders"],
+    "splicer:tier1/before@0.2.0": tracing["splicer:tier1/before@0.2.0"],
+    "splicer:tier1/after@0.2.0": tracing["splicer:tier1/after@0.2.0"],
+    ...
+};
+
+let gateway = new my:gateway {
+    "nebula:service/quotes": tracing-adapter-nebula-service-quotes["nebula:service/quotes"],
+    "nebula:service/orders": tracing-adapter-nebula-service-orders["nebula:service/orders"],
+    ...
+};
+
+let tracing-adapter-wasi-http-incoming-handler-v0-v2-v10 = new my:tracing-adapter-wasi-http-incoming-handler-v0-v2-v10 {
+    "wasi:http/incoming-handler@0.2.10": gateway["wasi:http/incoming-handler@0.2.10"],
+    "splicer:tier1/before@0.2.0": tracing["splicer:tier1/before@0.2.0"],
+    "splicer:tier1/after@0.2.0": tracing["splicer:tier1/after@0.2.0"],
+    ...
+};
+
+export tracing-adapter-wasi-http-incoming-handler-v0-v2-v10["wasi:http/incoming-handler@0.2.10"];

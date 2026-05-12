@@ -4,3 +4,4 @@ build:
 
 dev:
   wasi_otel: true
+  async: true

@@ -1,0 +1,8 @@
+version: 1
+
+rules:
+  - before:
+      interface: "*"
+    inject:
+      - name: "tracing"
+        path: ./proxies/bin/tracing.wasm
