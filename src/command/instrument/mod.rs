@@ -162,39 +162,39 @@ fn build_splice_rules(
     let rules = vec![
         SpliceRule::Before {
             interface: "wasi:http/incoming-handler@0.2.10".to_string(),
-            provider_name: None,
+            provider_name: Some(String::from("gateway")),
             provider_alias: None,
-            inject: vec![Injection::from_path("tracing", tracing_path.clone())],
+            inject: vec![Injection::from_path("tracinga", tracing_path.clone())],
         },
         SpliceRule::Before {
             interface: "nebula:demo/identity".to_string(),
-            provider_name: None,
+            provider_name: Some(String::from("identity")),
             provider_alias: None,
-            inject: vec![Injection::from_path("tracing", tracing_path.clone())],
+            inject: vec![Injection::from_path("tracingb", tracing_path.clone())],
         },
         SpliceRule::Before {
             interface: "nebula:demo/pricing".to_string(),
-            provider_name: None,
+            provider_name: Some(String::from("pricing")),
             provider_alias: None,
-            inject: vec![Injection::from_path("tracing", tracing_path.clone())],
+            inject: vec![Injection::from_path("tracingc", tracing_path.clone())],
         },
         SpliceRule::Before {
             interface: "nebula:demo/driver".to_string(),
-            provider_name: None,
+            provider_name: Some(String::from("driver")),
             provider_alias: None,
-            inject: vec![Injection::from_path("tracing", tracing_path.clone())],
+            inject: vec![Injection::from_path("tracingd", tracing_path.clone())],
         },
         SpliceRule::Before {
             interface: "nebula:demo/matcher".to_string(),
-            provider_name: None,
+            provider_name: Some(String::from("matcher")),
             provider_alias: None,
-            inject: vec![Injection::from_path("tracing", tracing_path.clone())],
+            inject: vec![Injection::from_path("tracinge", tracing_path.clone())],
         },
         SpliceRule::Before {
             interface: "nebula:demo/payment".to_string(),
-            provider_name: None,
+            provider_name: Some(String::from("payment")),
             provider_alias: None,
-            inject: vec![Injection::from_path("tracing", tracing_path.clone())],
+            inject: vec![Injection::from_path("tracingf", tracing_path.clone())],
         },
     ];
 

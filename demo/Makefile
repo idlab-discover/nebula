@@ -9,7 +9,7 @@ all: fetch build compose
 # --features wasi-otel-framework/traces
 
 build:
-	cargo build --release  --target wasm32-wasip2
+	cargo build --release --features wasi-otel-framework/traces --target wasm32-wasip2
 
 fetch:
 	@$(foreach m,$(MEMBERS) otel http, \
