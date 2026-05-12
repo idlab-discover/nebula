@@ -1,0 +1,5 @@
+interface pricing {
+    use types.{vehicle};
+    /// Calculate the indicative price for a ride based on the distance and vehicle type.
+    calculate: func(distance: f64, vehicle: vehicle) -> f64;
+}

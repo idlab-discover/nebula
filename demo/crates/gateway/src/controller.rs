@@ -1,48 +1,76 @@
 use serde_json::json;
 use wasi_http_framework::{Request, Response};
 
-use crate::nebula::core::types::Order;
-use crate::nebula::service;
-use crate::schema::{OrderRequest, QuoteResponse};
+use crate::nebula::demo::{identity, matcher, payment, pricing};
+use crate::schema::{RideRequest, RideResponse};
 
-pub fn create_order(req: &Request) -> Response {
-	let order = match serde_json::from_slice::<OrderRequest>(&req.body) {
-		Ok(order) => Ok(Order::from(order)),
+pub fn request_ride(req: &Request) -> Response {
+	let request = match serde_json::from_slice::<RideRequest>(&req.body) {
+		Ok(request) => request,
 		Err(e) => {
-			let msg = format!("Invalid order format: {}", e);
-			Err(msg)
+			let msg = format!("Invalid request format: {}", e);
+			return Response::json(json!({ "error": msg }), 400);
 		},
 	};
 
-	let order = match order {
-		Ok(o) => o,
-		Err(e) => return Response::json(json!({ "error": e }), 400),
+	// Authenticate the user based on the header bearer token
+	let Some(token) = req
+		.headers
+		.iter()
+		.find(|(k, _)| k.to_lowercase() == "authorization")
+		.map(|(_, v)| v)
+	else {
+		return Response::json(
+			json!({ "error": "Missing authorization token" }),
+			401,
+		);
 	};
 
-	// let order_json = serde_json::to_string(&req.body).unwrap_or_default();
+	let user = match identity::validate(token) {
+		Ok(user) => user,
+		Err(e) => {
+			let msg = format!("Invalid token: {}", e);
+			return Response::json(json!({ "error": msg }), 401);
+		},
+	};
 
-	let quote = service::orders::create_order(&order);
+	// Get the tentative pricing for the requested ride.
+	let distance = request.pickup.distance_to(&request.dropoff);
+	let price = pricing::calculate(distance, request.vehicle);
 
-	Response::json(QuoteResponse::from(quote), 200)
+	// Find a driver
+	let driver = match matcher::find(request.vehicle, request.pickup, price) {
+		Ok(driver) => driver,
+		Err(e) => {
+			let msg = format!("Failed to find driver: {}", e);
+			return Response::json(json!({ "error": msg }), 500);
+		},
+	};
+
+	// Calculate payment URL
+	let payment_url = match payment::generate_link(&user, price) {
+		Ok(url) => url,
+		Err(e) => {
+			let msg = format!("Failed to generate payment link: {}", e);
+			return Response::json(json!({ "error": msg }), 500);
+		},
+	};
+
+	return Response::json(
+		RideResponse { driver, price, payment_url, distance },
+		200,
+	);
 }
 
-pub fn read_quote(req: &Request) -> Response {
-	let quote_id = req.path_params.get("id");
-
-	let quote_id = match quote_id {
-		Some(id) => id,
-		None => {
-			return Response::json(
-				json!({ "error": "Missing or invalid `id` query parameter" }),
-				400,
-			);
+pub fn get_token(_req: &Request) -> Response {
+	let token = match identity::token("id", "Ewout", "ewout.verlinde@ugent.be")
+	{
+		Ok(token) => token,
+		Err(e) => {
+			let msg = format!("Failed to generate token: {}", e);
+			return Response::json(json!({ "error": msg }), 500);
 		},
 	};
 
-	let quote = service::quotes::read_quote(quote_id);
-
-	match quote {
-		Some(quote) => Response::json(QuoteResponse::from(quote), 200),
-		None => Response::json(json!({ "error": "Quote not found" }), 404),
-	}
+	Response::json(json!({ "token": token }), 200)
 }

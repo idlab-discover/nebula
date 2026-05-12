@@ -1,6 +1,0 @@
-build:
-  command: "true"
-  component_path: orders.wasm
-
-dev:
-  wasi_otel: true

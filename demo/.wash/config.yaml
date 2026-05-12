@@ -1,6 +1,6 @@
 build:
   command: make build && make compose
-  component_path: target/wasm32-wasip2/release/orders.wasm
+  component_path: target/wasm32-wasip2/release/nebulift.wasm
 
 dev:
   wasi_otel: true

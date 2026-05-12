@@ -1,0 +1,30 @@
+/// Shared types.
+interface types {
+    /// Coordinates for a location.
+    record coordinates {
+        latitude: f64,
+        longitude: f64,
+    }
+
+    /// Vehicle types a ride can be requested for.
+    enum vehicle {
+        sedan,
+        suv,
+        truck,
+        motorcycle,
+    }
+
+    /// A simple user record.
+    record user {
+        id: string,
+        name: string,
+        email: string,
+    }
+
+    /// A simple driver record.
+    record driver {
+        user: user,
+        vehicle: vehicle,
+        location: coordinates,
+    }
+}

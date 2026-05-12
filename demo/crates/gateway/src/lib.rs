@@ -7,8 +7,8 @@ use wasi_http_framework::wasi::http::types::{
 	ResponseOutparam,
 };
 use wasi_http_framework::{Request, Response, Router};
+use wasi_otel_framework::tracing::Tracer;
 
-// use wasi_otel_framework::tracing::Tracer;
 use crate::exports::wasi::http::incoming_handler::Guest;
 
 wit_bindgen::generate!({
@@ -31,20 +31,24 @@ impl Guest for Gateway {
 		let mut router = Router::new();
 
 		// Order routes
-		router = router.post("/orders", controller::create_order);
-		// .get("/orders/:id", get_order)
-		// .delete("/orders/:id", delete_order);
+		router = router.post("/ride", controller::request_ride);
+		router = router.get("/token", controller::get_token);
 
-		// Quote routes
-		router = router.get("/quotes/:id", controller::read_quote);
-		// .post("/quotes", create_quote)
-		// .delete("/quotes/:id", delete_quote);
+		let tracer = Tracer::new("demo-gateway");
 
-		if let Ok(request) = Request::from_wasi(req) {
-			let response = router.handle(request);
-			response.send(res);
+		if let Some(path) = req.path_with_query() {
+			tracer.start_span(path.as_str(), |_span| {
+				if let Ok(request) = Request::from_wasi(req) {
+					let response = router.handle(request);
+					response.send(res);
+				} else {
+					let json = json!({ "error": "Invalid request" });
+					let response = Response::json(json, 400);
+					response.send(res);
+				}
+			});
 		} else {
-			let json = json!({ "error": "Invalid request" });
+			let json = json!({ "error": "Invalid request path" });
 			let response = Response::json(json, 400);
 			response.send(res);
 		}

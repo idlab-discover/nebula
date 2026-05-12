@@ -1,7 +1,10 @@
 use crate::bindings::wasi::clocks::wall_clock::{Datetime, now};
+#[cfg(feature = "traces")]
 use crate::bindings::wasi::otel::tracing;
+#[cfg(feature = "traces")]
+use crate::bindings::wasi::otel::tracing::SpanData;
 use crate::bindings::wasi::otel::tracing::{
-    Event, Link, SpanContext, SpanData, SpanKind, Status, TraceFlags,
+    Event, Link, SpanContext, SpanKind, Status, TraceFlags,
 };
 use crate::bindings::wasi::otel::types::{InstrumentationScope, Key, KeyValue, Value};
 use crate::bindings::wasi::random::random;
@@ -24,8 +27,18 @@ impl Span {
     /// Create a new span with the given name and parent context
     #[must_use]
     pub fn new(name: &str, scope_name: &str) -> Self {
-        // let parent_context = tracing::current_span_context();
+        #[cfg(feature = "traces")]
         let parent_context = tracing::outer_span_context();
+
+        #[cfg(not(feature = "traces"))]
+        let parent_context = SpanContext {
+            trace_id: String::new(),
+            trace_state: vec![],
+            span_id: String::new(),
+            trace_flags: TraceFlags::SAMPLED,
+            is_remote: false,
+        };
+
         let span_id = random::get_random_u64();
 
         let context = SpanContext {
@@ -56,28 +69,32 @@ impl Span {
     }
 
     pub fn start(&self) {
+        #[cfg(feature = "traces")]
         tracing::on_start(&self.context);
     }
 
     pub fn stop(self) {
-        let data = SpanData {
-            span_context: self.context,
-            parent_span_id: self.parent_span_id,
-            span_kind: self.kind,
-            name: self.name,
-            start_time: self.start_time,
-            end_time: now(),
-            attributes: self.attributes,
-            events: self.events,
-            links: self.links,
-            status: self.status,
-            instrumentation_scope: self.instrumentation_scope,
-            dropped_attributes: 0,
-            dropped_events: 0,
-            dropped_links: 0,
-        };
+        #[cfg(feature = "traces")]
+        {
+            let data = SpanData {
+                span_context: self.context,
+                parent_span_id: self.parent_span_id,
+                span_kind: self.kind,
+                name: self.name,
+                start_time: self.start_time,
+                end_time: now(),
+                attributes: self.attributes,
+                events: self.events,
+                links: self.links,
+                status: self.status,
+                instrumentation_scope: self.instrumentation_scope,
+                dropped_attributes: 0,
+                dropped_events: 0,
+                dropped_links: 0,
+            };
 
-        tracing::on_end(&data);
+            tracing::on_end(&data);
+        }
     }
 
     /// Set the kind of the current span (e.g., internal, server, client)

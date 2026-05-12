@@ -152,12 +152,51 @@ fn build_splice_rules(
         .into_string()
         .map_err(|_| anyhow::anyhow!("tracing proxy path contains non-UTF-8 bytes"))?;
 
-    let rules = vec![SpliceRule::Before {
-        interface_glob: "*".to_string(),
-        provider_name: None,
-        provider_alias: None,
-        inject: vec![Injection::from_path("tracing", tracing_path.clone())],
-    }];
+    // SpliceRule::Before {
+    //     interface_glob: "*".to_string(),
+    //     provider_name: None,
+    //     provider_alias: None,
+    //     inject: vec![Injection::from_path("tracing", tracing_path.clone())],
+    // }
+
+    let rules = vec![
+        SpliceRule::Before {
+            interface: "wasi:http/incoming-handler@0.2.10".to_string(),
+            provider_name: None,
+            provider_alias: None,
+            inject: vec![Injection::from_path("tracing", tracing_path.clone())],
+        },
+        SpliceRule::Before {
+            interface: "nebula:demo/identity".to_string(),
+            provider_name: None,
+            provider_alias: None,
+            inject: vec![Injection::from_path("tracing", tracing_path.clone())],
+        },
+        SpliceRule::Before {
+            interface: "nebula:demo/pricing".to_string(),
+            provider_name: None,
+            provider_alias: None,
+            inject: vec![Injection::from_path("tracing", tracing_path.clone())],
+        },
+        SpliceRule::Before {
+            interface: "nebula:demo/driver".to_string(),
+            provider_name: None,
+            provider_alias: None,
+            inject: vec![Injection::from_path("tracing", tracing_path.clone())],
+        },
+        SpliceRule::Before {
+            interface: "nebula:demo/matcher".to_string(),
+            provider_name: None,
+            provider_alias: None,
+            inject: vec![Injection::from_path("tracing", tracing_path.clone())],
+        },
+        SpliceRule::Before {
+            interface: "nebula:demo/payment".to_string(),
+            provider_name: None,
+            provider_alias: None,
+            inject: vec![Injection::from_path("tracing", tracing_path.clone())],
+        },
+    ];
 
     Ok(rules)
 }

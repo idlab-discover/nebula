@@ -1,8 +1,16 @@
 [workspace]
 resolver = "3"
-members = ["crates/gateway", "crates/otel", "crates/service"]
+members = [
+    "crates/gateway",
+    "crates/otel",
+    "crates/identity",
+    "crates/pricing",
+    "crates/matcher",
+    "crates/driver",
+    "crates/payment",
+]
 
 [workspace.dependencies]
 serde = { version = "*" }
 serde_json = { version = "1.0.149" }
-wit-bindgen = { version = "0.54.0" }
+wit-bindgen = { version = "0.57.1" }

@@ -1,0 +1,2 @@
+[overrides]
+"nebula:demo" = { path = "../../wit" }

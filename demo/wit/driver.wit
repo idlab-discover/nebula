@@ -1,0 +1,11 @@
+interface driver {
+    use types.{coordinates, driver, vehicle, user};
+    /// Confirm a ride request for a given user and driver, returning whether the confirmation was successful or not.
+    check: func(driver: driver, distance: f64, price: f64) -> bool;
+}
+
+interface matcher {
+    use types.{coordinates, vehicle, driver};
+    /// Find a matching driver for a given vehicle and location and return the driver record.
+    find: func(vehicle: vehicle, location: coordinates, price: f64) -> result<driver, string>;
+}

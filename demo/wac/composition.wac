@@ -1,10 +1,20 @@
 package nebula:orders;
 
-let service = new nebula:service { ... };
+let identity = new nebula:identity { ... };
+let pricing = new nebula:pricing { ... };
+let payment = new nebula:payment { ... };
+let driver = new nebula:driver { ... };
+
+let matcher = new nebula:matcher {
+    "nebula:demo/driver": driver["nebula:demo/driver"],
+    ... 
+};
 
 let gateway = new nebula:gateway {
-    "nebula:service/orders": service["nebula:service/orders"],
-    "nebula:service/quotes": service["nebula:service/quotes"],
+    "nebula:demo/identity": identity["nebula:demo/identity"],
+    "nebula:demo/pricing": pricing["nebula:demo/pricing"],
+    "nebula:demo/matcher": matcher["nebula:demo/matcher"],
+    "nebula:demo/payment": payment["nebula:demo/payment"],
     ...
 };
 

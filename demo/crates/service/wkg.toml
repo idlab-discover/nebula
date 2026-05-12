@@ -1,2 +1,0 @@
-[overrides]
-"nebula:core" = { path = "../../wit" }

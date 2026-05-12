@@ -3,6 +3,10 @@ name = "wasi-otel-framework"
 version = "0.1.0"
 edition = "2024"
 
+[features]
+default = []
+traces = []
+
 [[bin]]
 name = "playground"
 path = "src/main.rs"

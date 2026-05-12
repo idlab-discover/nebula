@@ -1,0 +1,7 @@
+interface identity {
+    use types.{user};
+    /// Get a JWT token for a given user.
+    token: func(id: string, name: string, email: string) -> result<string, string>;
+    /// Validate a JWT token and return the corresponding user record.
+    validate: func(token: string) -> result<user, string>;
+}

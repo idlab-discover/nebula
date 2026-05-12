@@ -1,0 +1,5 @@
+interface notification {
+    use types.{user};
+    /// Send a notification to a given user with the specified message.
+    send: func(user: user, message: string);
+}

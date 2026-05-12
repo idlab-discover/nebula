@@ -1,0 +1,17 @@
+[package]
+name = "identity"
+version = "0.1.0"
+edition = "2024"
+
+[lib]
+crate-type = ["cdylib"]
+
+[dependencies]
+# `rust_crypto` is needed to compile to wasm, since it can't pick a crypto backend at runtime.
+jsonwebtoken = { version = "10.4", default-features = false, features = [
+    "rust_crypto",
+] }
+wit-bindgen = { version = "*" }
+wasi-otel-framework = { path = "../otel" }
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"

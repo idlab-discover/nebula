@@ -1,0 +1,5 @@
+interface payment {
+    use types.{user};
+    /// Generate a payment link for a given amount and user.
+    generate-link: func(user: user, amount: f64) -> result<string, string>;
+}
