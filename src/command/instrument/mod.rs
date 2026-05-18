@@ -3,8 +3,10 @@ use std::path::{Path, PathBuf};
 
 use anyhow::{Context, Result, bail};
 use clap::{Args, ValueEnum};
+use splicer::cviz::model::CompositionGraph;
 use splicer::cviz::parse::component::parse_component;
 use splicer::lowlevel::{Injection, SpliceRule, split_out_composition};
+use tracing::info;
 use wac_graph::EncodeOptions;
 use wac_parser::Document;
 use wac_resolver::FileSystemPackageResolver;
@@ -75,11 +77,9 @@ impl CliCommand for InstrumentCommand {
         let graph = parse_component(&input_bytes)
             .with_context(|| format!("failed to parse component: {}", input_path.display()))?;
 
-        // 2. Build the splicer rules directly from the discovered interfaces
+        // 2. Build the splicer rules directly from the discovered graph
         //    and requested instrumentation(s).
-        let interfaces: Vec<String> = graph.component_exports.keys().cloned().collect();
-
-        let rules = build_splice_rules(&interfaces, &self.instrumentation)?;
+        let rules = build_splice_rules(&graph)?;
 
         // 3. Split the component and run the splicer low-level pipeline.
         let splits_dir =
@@ -120,25 +120,23 @@ impl CliCommand for InstrumentCommand {
     }
 }
 
-/// Builds the splicer rules directly from the discovered interfaces and
-/// requested instrumentation(s). For each combination of interface and
-/// instrumentation, a rule is created that injects the corresponding middleware
-/// into the interface.
-fn build_splice_rules(
-    interfaces: &[String],
-    _instrumentation: &[Instrumentation],
-) -> Result<Vec<SpliceRule>> {
-    if interfaces.is_empty() {
-        bail!(
-            "no exported interfaces found in component; cannot derive \
-			 instrumentation targets"
-        );
+///
+fn injection_suffix(index: usize) -> String {
+    if index < 26 {
+        return ((b'a' + index as u8) as char).to_string();
     }
 
-    let tracing_path = PathBuf::from(env!("CARGO_MANIFEST_DIR"))
-        .join("proxies")
-        .join("bin")
-        .join("tracing.wasm");
+    // Skip "aa"
+    let n = index - 25;
+
+    let first = ((n / 25) % 26) as u8;
+    let second = ((n % 25) + 1) as u8;
+
+    format!("{}{}", (b'a' + first) as char, (b'a' + second) as char)
+}
+
+fn build_splice_rules(graph: &CompositionGraph) -> Result<Vec<SpliceRule>> {
+    let tracing_path = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("proxies/bin/tracing.wasm");
 
     if !tracing_path.exists() {
         bail!(
@@ -150,53 +148,38 @@ fn build_splice_rules(
     let tracing_path = tracing_path
         .into_os_string()
         .into_string()
-        .map_err(|_| anyhow::anyhow!("tracing proxy path contains non-UTF-8 bytes"))?;
+        .map_err(|_| anyhow::anyhow!("Could not map tracing path to string"))?;
 
-    // SpliceRule::Before {
-    //     interface_glob: "*".to_string(),
-    //     provider_name: None,
-    //     provider_alias: None,
-    //     inject: vec![Injection::from_path("tracing", tracing_path.clone())],
-    // }
+    let mut rules = Vec::new();
+    let mut injection_idx = 0;
 
-    let rules = vec![
-        SpliceRule::Before {
-            interface: "wasi:http/incoming-handler@0.2.10".to_string(),
-            provider_name: Some(String::from("gateway")),
+    let mut push_rule = |interface: String, provider_name: String| {
+        let name = format!("tracing-{}", injection_suffix(injection_idx));
+        injection_idx += 1;
+
+        rules.push(SpliceRule::Before {
+            interface,
+            provider_name: Some(provider_name),
             provider_alias: None,
-            inject: vec![Injection::from_path("tracinga", tracing_path.clone())],
-        },
-        SpliceRule::Before {
-            interface: "nebula:demo/identity".to_string(),
-            provider_name: Some(String::from("identity")),
-            provider_alias: None,
-            inject: vec![Injection::from_path("tracingb", tracing_path.clone())],
-        },
-        SpliceRule::Before {
-            interface: "nebula:demo/pricing".to_string(),
-            provider_name: Some(String::from("pricing")),
-            provider_alias: None,
-            inject: vec![Injection::from_path("tracingc", tracing_path.clone())],
-        },
-        SpliceRule::Before {
-            interface: "nebula:demo/driver".to_string(),
-            provider_name: Some(String::from("driver")),
-            provider_alias: None,
-            inject: vec![Injection::from_path("tracingd", tracing_path.clone())],
-        },
-        SpliceRule::Before {
-            interface: "nebula:demo/matcher".to_string(),
-            provider_name: Some(String::from("matcher")),
-            provider_alias: None,
-            inject: vec![Injection::from_path("tracinge", tracing_path.clone())],
-        },
-        SpliceRule::Before {
-            interface: "nebula:demo/payment".to_string(),
-            provider_name: Some(String::from("payment")),
-            provider_alias: None,
-            inject: vec![Injection::from_path("tracingf", tracing_path.clone())],
-        },
-    ];
+            inject: vec![Injection::from_path(name, tracing_path.clone())],
+        });
+    };
+
+    for (iface, export) in &graph.component_exports {
+        let provider = graph.nodes[&export.source_instance].name.clone();
+        push_rule(iface.clone(), provider);
+    }
+
+    for node in graph.real_nodes() {
+        for import in &node.imports {
+            if let Some(source) = &import.source_instance {
+                let provider = graph.nodes[source].name.clone();
+                push_rule(import.interface_name.clone(), provider);
+            }
+        }
+    }
+
+    info!(?rules);
 
     Ok(rules)
 }

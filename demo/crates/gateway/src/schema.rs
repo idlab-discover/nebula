@@ -70,7 +70,7 @@ pub struct RideRequest {
 pub struct RideResponse {
 	#[serde(with = "DerivedDriver")]
 	pub driver:      Driver,
-	pub price:       f64,
-	pub distance:    f64,
+	pub price:       String,
+	pub distance:    String,
 	pub payment_url: String,
 }

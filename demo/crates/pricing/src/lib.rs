@@ -21,16 +21,6 @@ impl Guest for Pricing {
 		tracer.start_span("pricing::calculate", |span| {
 			let distance_km = distance / 1000.0;
 
-			span.set_attribute(
-				String::from("distance_km"),
-				format!("{:.2}km", distance_km),
-			);
-
-			span.set_attribute(
-				String::from("vehicle"),
-				format!("{:?}", vehicle),
-			);
-
 			let base_fare = 2.5;
 
 			let distance_rate = match vehicle {
@@ -40,7 +30,7 @@ impl Guest for Pricing {
 				Vehicle::Motorcycle => 0.8,
 			};
 
-			base_fare + distance.max(0.0) * distance_rate
+			base_fare + distance_km.max(0.0) * distance_rate
 		})
 	}
 }

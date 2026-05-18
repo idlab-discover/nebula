@@ -7,9 +7,9 @@ name = "splicer:tier1"
 registry = "ejrgilbert"
 
 [[packages.versions]]
-requirement = "=0.2.0"
-version = "0.2.0"
-digest = "sha256:b9ab99af8b7b887f6fe0df766370763b7f534221f72233d9d965f7342f90207a"
+requirement = "=0.3.0"
+version = "0.3.0"
+digest = "sha256:f611e188697b7481761f8a78177abae7fbe491c6b521b59213167efcd44df172"
 
 [[packages]]
 name = "wasi:cli"

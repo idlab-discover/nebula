@@ -1,7 +1,3 @@
-use std::thread::sleep;
-use std::time::Duration;
-
-use rand::RngExt;
 use wasi_otel_framework::tracing::Tracer;
 
 use crate::exports::nebula::demo::matcher::Guest;
@@ -49,12 +45,8 @@ impl Guest for Matcher {
 
 		tracer.start_span("matcher::find", |_span| {
 			let mut candidates = crate::mock::mock_drivers();
-			let mut rng = rand::rng();
 
 			while !candidates.is_empty() {
-				let delay_ms = rng.random_range(3..=15);
-				sleep(Duration::from_millis(delay_ms));
-
 				let Some((index, candidate, distance)) =
 					crate::mock::closest_driver(
 						&candidates,
@@ -62,8 +54,9 @@ impl Guest for Matcher {
 						&location,
 					)
 				else {
-					return Err("no mock drivers match the requested vehicle"
-						.to_string());
+					return Err(String::from(
+						"no mock drivers match the requested vehicle",
+					));
 				};
 
 				if driver::check(&candidate, distance, price) {

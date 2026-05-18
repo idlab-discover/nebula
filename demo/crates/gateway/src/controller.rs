@@ -56,10 +56,17 @@ pub fn request_ride(req: &Request) -> Response {
 		},
 	};
 
-	return Response::json(
-		RideResponse { driver, price, payment_url, distance },
-		200,
-	);
+	let distance_km = format!("{:.2}km", distance / 1000.0);
+	let price_str = format!("€{:.2}", price);
+
+	let response = RideResponse {
+		driver,
+		price: price_str,
+		distance: distance_km,
+		payment_url,
+	};
+
+	return Response::json(response, 200);
 }
 
 pub fn get_token(_req: &Request) -> Response {

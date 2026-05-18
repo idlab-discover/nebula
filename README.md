@@ -1,8 +1,10 @@
-# PoC / Nebula (WIP)
+# PoC / WasmLens
 
-**nebula** is a CLI tool that automatically instruments arbitrary WebAssembly components with [OpenTelemetry](https://opentelemetry.io/) tracing via the `wasi:otel` interface, with no changes required to the component's source code.
+**wasmlens** is a CLI tool that automatically instruments arbitrary WebAssembly components with distributed tracing through the `wasi:otel` interface, requiring no modifications to the component’s source code.
 
-It works by generating a **proxy component** that mirrors every import and export of the target component, and injects `wasi:otel` entry/exit spans around each proxied function call. The original component is left unmodified; the proxy wraps it at the composed-component level.
+It operates by interposing every component import and top-level export with a tier-1 tracing middleware generated using [`splicer`](https://github.com/ejrgilbert/splicer). Leveraging splicer’s adapter generation capabilities, WasmLens constructs proxy components that mirror the complete import/export surface of the target component and transparently inject `wasi:otel` entry and exit spans around each proxied function call. The original component remains untouched; instrumentation is applied entirely at the composed-component layer through proxy wrapping.
+
+Special thanks to Elizabeth Gilbert, the creator of `splicer`, for making this possible! This project aims to demonstrate a practical real-world use case for automatic instrumentation of arbitrary WebAssembly components.
 
 ## Background
 
@@ -27,11 +29,11 @@ The host maintains a **stack** of active span contexts:
 - `on-end` pops it.
 - `inner-span-context` returns the top of the stack: the innermost currently-active span, regardless of which component started it.
 
-This restores correct parent-child tracing across static composition boundaries, which is a prerequisite for automatic instrumentation of composed components to produce meaningful traces.
+This restores correct parent-child tracing across static composition boundaries, which is a prerequisite for automatic instrumentation of composed components to produce meaningful traces. This proposal was [accepted and merged](https://github.com/WebAssembly/wasi-otel/pull/16) into the main branch of `wasi:otel`.
 
 ## Usage
 
-Instruments WebAssembly components by generating a proxy wrapper that adds logging and tracing capabilities to all exported interfaces.
+Instruments WebAssembly components by generating a proxy wrapper that adds logging and tracing capabilities to all exported interfaces. The tool and its accompanied demo depend on the updated `wasi:otel` interface and a fork of `wasmCloud` implementing it, included as a submodule. `wkg-registries.toml` contains the registries hosting the splicer middleware and updated `wasi:otel` WIT interfaces necessary to experiment with the PoC.
 
 ### Arguments
 
@@ -42,6 +44,8 @@ nebula instrument <INPUTS>... [OPTIONS]
 | Argument      | Description                                                                       |
 | :------------ | :-------------------------------------------------------------------------------- |
 | `<INPUTS>...` | Path(s) to `.wasm` component files or a directory containing multiple components. |
+
+By default, the tool detects all imports and top-level exports of the composition and instruments it through auto-generated splicer rules.
 
 ### Options
 
@@ -68,14 +72,6 @@ cargo build --release
 ```
 
 Requires a Rust toolchain with the version specified in [`rust-toolchain.toml`](rust-toolchain.toml).
-
-## Roadmap
-
-- [x] Generate proxy WIT world
-- [x] Generate proxy WIT world bindings
-- [ ] Generate Rust implementation based on bindings
-- [ ] Emit proxy Wasm
-- [ ] Automatically compose input components + proxy (`wac`)
 
 ## License
 

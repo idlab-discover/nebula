@@ -1,4 +1,4 @@
-package nebula:orders;
+package nebula:demo;
 
 let identity = new nebula:identity { ... };
 let pricing = new nebula:pricing { ... };

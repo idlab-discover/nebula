@@ -2,7 +2,32 @@ version: 1
 
 rules:
   - before:
-      interface: "*"
+      interface: "wasi:http/incoming-handler@0.2.10"
     inject:
-      - name: "tracing"
+      - name: tracing1
+        path: ./proxies/bin/tracing.wasm
+  - before:
+      interface: "nebula:demo/identity"
+    inject:
+      - name: tracing2
+        path: ./proxies/bin/tracing.wasm
+  - before:
+      interface: "nebula:demo/pricing"
+    inject:
+      - name: tracing3
+        path: ./proxies/bin/tracing.wasm
+  - before:
+      interface: "nebula:demo/matcher"
+    inject:
+      - name: tracing5
+        path: ./proxies/bin/tracing.wasm
+  - before:
+      interface: "nebula:demo/driver"
+    inject:
+      - name: tracing4
+        path: ./proxies/bin/tracing.wasm
+  - before:
+      interface: "nebula:demo/payment"
+    inject:
+      - name: tracing6
         path: ./proxies/bin/tracing.wasm

@@ -1,0 +1,121 @@
+package example:composition;
+
+let identity = new my:identity {
+    ...
+};
+
+let pricing = new my:pricing {
+    ...
+};
+
+let payment = new my:payment {
+    ...
+};
+
+let driver = new my:driver {
+    ...
+};
+
+let tracing6 = new my:tracing6 { ... };
+
+let tracing6-adapter-nebula-demo-payment = new my:tracing6-adapter-nebula-demo-payment {
+    "nebula:demo/payment": payment["nebula:demo/payment"],
+    "splicer:tier1/before@0.2.0": tracing6["splicer:tier1/before@0.2.0"],
+    "splicer:tier1/after@0.2.0": tracing6["splicer:tier1/after@0.2.0"],
+    ...
+};
+
+let tracing6-adapter-nebula-demo-payment = new my:tracing6-adapter-nebula-demo-payment {
+    "nebula:demo/payment": tracing6-adapter-nebula-demo-payment["nebula:demo/payment"],
+    "splicer:tier1/before@0.2.0": tracing6["splicer:tier1/before@0.2.0"],
+    "splicer:tier1/after@0.2.0": tracing6["splicer:tier1/after@0.2.0"],
+    ...
+};
+
+let matcher = new my:matcher {
+    "nebula:demo/driver": driver["nebula:demo/driver"],
+    ...
+};
+
+let tracing5 = new my:tracing5 { ... };
+
+let tracing5-adapter-nebula-demo-matcher = new my:tracing5-adapter-nebula-demo-matcher {
+    "nebula:demo/matcher": matcher["nebula:demo/matcher"],
+    "splicer:tier1/before@0.2.0": tracing5["splicer:tier1/before@0.2.0"],
+    "splicer:tier1/after@0.2.0": tracing5["splicer:tier1/after@0.2.0"],
+    ...
+};
+
+let tracing5-adapter-nebula-demo-matcher = new my:tracing5-adapter-nebula-demo-matcher {
+    "nebula:demo/matcher": tracing5-adapter-nebula-demo-matcher["nebula:demo/matcher"],
+    "splicer:tier1/before@0.2.0": tracing5["splicer:tier1/before@0.2.0"],
+    "splicer:tier1/after@0.2.0": tracing5["splicer:tier1/after@0.2.0"],
+    ...
+};
+
+let tracing3 = new my:tracing3 { ... };
+
+let tracing3-adapter-nebula-demo-pricing = new my:tracing3-adapter-nebula-demo-pricing {
+    "nebula:demo/pricing": pricing["nebula:demo/pricing"],
+    "splicer:tier1/before@0.2.0": tracing3["splicer:tier1/before@0.2.0"],
+    "splicer:tier1/after@0.2.0": tracing3["splicer:tier1/after@0.2.0"],
+    ...
+};
+
+let tracing3-adapter-nebula-demo-pricing = new my:tracing3-adapter-nebula-demo-pricing {
+    "nebula:demo/pricing": tracing3-adapter-nebula-demo-pricing["nebula:demo/pricing"],
+    "splicer:tier1/before@0.2.0": tracing3["splicer:tier1/before@0.2.0"],
+    "splicer:tier1/after@0.2.0": tracing3["splicer:tier1/after@0.2.0"],
+    ...
+};
+
+let tracing2 = new my:tracing2 { ... };
+
+let tracing2-adapter-nebula-demo-identity = new my:tracing2-adapter-nebula-demo-identity {
+    "nebula:demo/identity": identity["nebula:demo/identity"],
+    "splicer:tier1/before@0.2.0": tracing2["splicer:tier1/before@0.2.0"],
+    "splicer:tier1/after@0.2.0": tracing2["splicer:tier1/after@0.2.0"],
+    ...
+};
+
+let tracing2-adapter-nebula-demo-identity = new my:tracing2-adapter-nebula-demo-identity {
+    "nebula:demo/identity": tracing2-adapter-nebula-demo-identity["nebula:demo/identity"],
+    "splicer:tier1/before@0.2.0": tracing2["splicer:tier1/before@0.2.0"],
+    "splicer:tier1/after@0.2.0": tracing2["splicer:tier1/after@0.2.0"],
+    ...
+};
+
+let tracing4 = new my:tracing4 { ... };
+
+let tracing4-adapter-nebula-demo-driver = new my:tracing4-adapter-nebula-demo-driver {
+    "nebula:demo/driver": driver["nebula:demo/driver"],
+    "splicer:tier1/before@0.2.0": tracing4["splicer:tier1/before@0.2.0"],
+    "splicer:tier1/after@0.2.0": tracing4["splicer:tier1/after@0.2.0"],
+    ...
+};
+
+let tracing4-adapter-nebula-demo-driver = new my:tracing4-adapter-nebula-demo-driver {
+    "nebula:demo/driver": matcher["nebula:demo/driver"],
+    "splicer:tier1/before@0.2.0": tracing4["splicer:tier1/before@0.2.0"],
+    "splicer:tier1/after@0.2.0": tracing4["splicer:tier1/after@0.2.0"],
+    ...
+};
+
+let gateway = new my:gateway {
+    "nebula:demo/payment": tracing6-adapter-nebula-demo-payment["nebula:demo/payment"],
+    "nebula:demo/matcher": tracing5-adapter-nebula-demo-matcher["nebula:demo/matcher"],
+    "nebula:demo/pricing": tracing3-adapter-nebula-demo-pricing["nebula:demo/pricing"],
+    "nebula:demo/identity": tracing2-adapter-nebula-demo-identity["nebula:demo/identity"],
+    ...
+};
+
+let tracing1 = new my:tracing1 { ... };
+
+let tracing1-adapter-wasi-http-incoming-handler-v0-v2-v10 = new my:tracing1-adapter-wasi-http-incoming-handler-v0-v2-v10 {
+    "wasi:http/incoming-handler@0.2.10": gateway["wasi:http/incoming-handler@0.2.10"],
+    "splicer:tier1/before@0.2.0": tracing1["splicer:tier1/before@0.2.0"],
+    "splicer:tier1/after@0.2.0": tracing1["splicer:tier1/after@0.2.0"],
+    ...
+};
+
+export tracing1-adapter-wasi-http-incoming-handler-v0-v2-v10["wasi:http/incoming-handler@0.2.10"];
