@@ -1,7 +1,6 @@
 build:
-  command: make build && make compose
-  component_path: target/wasm32-wasip2/release/nebulift.wasm
+  command: "true"
+  component_path: ./bin/nebulift-auto-instrumented-rnd-1_0.wasm
 
 dev:
   wasi_otel: true
-  async: true

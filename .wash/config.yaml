@@ -1,6 +1,0 @@
-build:
-  command: "true"
-  component_path: ./bin/nebulift-auto-instrument.wasm
-
-dev:
-  wasi_otel: true

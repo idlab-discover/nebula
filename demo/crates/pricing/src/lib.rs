@@ -18,7 +18,7 @@ impl Guest for Pricing {
 	fn calculate(distance: f64, vehicle: Vehicle) -> f64 {
 		let tracer = Tracer::new("demo-pricing");
 
-		tracer.start_span("pricing::calculate", |span| {
+		tracer.start_span("pricing::calculate", |_span| {
 			let distance_km = distance / 1000.0;
 
 			let base_fare = 2.5;

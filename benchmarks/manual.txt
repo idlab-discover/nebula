@@ -1,0 +1,7 @@
+Thread Stats   Avg      Stdev     Max   +/- Stdev
+    Latency     7.57ms    8.12ms  58.40ms   91.28%
+    Req/Sec   165.32     46.53   340.00     68.20%
+  8240 requests in 10.01s, 3.03MB read
+  Non-2xx or 3xx responses: 361
+Requests/sec:    823.48
+Transfer/sec:    309.70KB
