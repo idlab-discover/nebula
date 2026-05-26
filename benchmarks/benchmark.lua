@@ -8,7 +8,7 @@ request = function()
 end
 
 response = function(status, headers, body)
-  if status >= 400 and status < 500 then
+  if status > 400 and status < 500 then
     io.write("HTTP " .. status .. ": " .. body .. "\n")
     io.flush()
   end

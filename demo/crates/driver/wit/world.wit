@@ -2,7 +2,8 @@ package nebula:driver;
 
 world driver {
     // Goofy workaround which I don't understand, pain
-    include wasi:cli/imports@0.2.10;
+    include wasi:clocks/imports@0.2.10;
+    include wasi:io/imports@0.2.10;
 
     // import wasi:otel/types@0.2.0-rc.3;
     // import wasi:otel/tracing@0.2.0-rc.3;

@@ -1,7 +1,7 @@
 mod bindings;
 
-use std::collections::HashMap;
-use std::sync::{LazyLock, Mutex};
+use std::cell::RefCell;
+use std::thread_local;
 
 use bindings::exports::splicer::tier1::after::Guest as AfterGuest;
 use bindings::exports::splicer::tier1::before::Guest as BeforeGuest;
@@ -21,62 +21,58 @@ struct InflightSpan {
     name: String,
 }
 
-/// A global map of in-flight spans, keyed by their span ID.
-/// todo(ewout): This assumes functions behave correctly and close their own
-/// spans, since we use `current_span_context` to find the span to close.
-/// We'd need a `id` on `CallId` and store that in the `InflightSpan` to be more
-/// robust.
-static INFLIGHT_SPANS: LazyLock<Mutex<HashMap<u64, InflightSpan>>> =
-    LazyLock::new(|| Mutex::new(HashMap::new()));
+thread_local! {
+    static INFLIGHT_SPANS: RefCell<Vec<InflightSpan>> = const { RefCell::new(Vec::new()) };
+    static PRNG: RefCell<fastrand::Rng> = RefCell::new(fastrand::Rng::with_seed(random::get_random_u64()));
+}
 
 struct TracingProxy;
 
 impl BeforeGuest for TracingProxy {
-    /// Called before every invocation of a target-interface function.
     #[allow(async_fn_in_trait)]
     async fn on_call(call: CallId) {
-        // Create a new span context for the call, using the current outer span
-        // context as the parent.
         let parent_context = tracing::current_span_context();
-        let span_id = format!("{:016x}", random::get_random_u64());
-
-        let context = tracing::SpanContext {
-            trace_id: parent_context.trace_id.clone(),
-            span_id: span_id.clone(),
-            trace_flags: tracing::TraceFlags::SAMPLED,
-            is_remote: true,
-            trace_state: parent_context.trace_state.clone(),
-        };
-
         let start_time = wall_clock::now();
-        let parent_span_id = parent_context.span_id;
+
+        // Generate random u64 strictly in guest memory
+        let raw_span_id = PRNG.with(|rng| rng.borrow_mut().u64(..));
+        let span_id = format!("{:016x}", raw_span_id);
+
         let name = format!("{}.{}", call.interface_name, call.function_name);
 
+        // We need a copy of this for the InflightSpan tracking
+        let parent_span_id = parent_context.span_id.clone();
+
+        // Construct the context using moves, no string cloning required!
+        let context = tracing::SpanContext {
+            trace_id: parent_context.trace_id,
+            span_id,
+            trace_flags: tracing::TraceFlags::SAMPLED,
+            is_remote: true,
+            trace_state: parent_context.trace_state,
+        };
+
+        // Pass by reference to the host
+        tracing::on_start(&context);
+
+        // Move the context directly into the struct (0 clones)
         let inflight_span = InflightSpan {
-            context: context.clone(),
-            parent_span_id: parent_span_id.clone(),
+            context,
+            parent_span_id,
             start_time,
             name,
         };
 
-        if let Ok(mut spans) = INFLIGHT_SPANS.lock() {
-            spans.insert(call.id, inflight_span);
-        }
-
-        tracing::on_start(&context);
+        INFLIGHT_SPANS.with(|spans| spans.borrow_mut().push(inflight_span));
     }
 }
 
 impl AfterGuest for TracingProxy {
-    /// Called after every invocation of a target-interface function.
     #[allow(async_fn_in_trait)]
-    async fn on_return(call: CallId) {
+    async fn on_return(_call: CallId) {
         let end_time = wall_clock::now();
 
-        let inflight: Option<InflightSpan> = INFLIGHT_SPANS
-            .lock()
-            .ok()
-            .and_then(|mut spans| spans.remove(&call.id));
+        let inflight = INFLIGHT_SPANS.with(|spans| spans.borrow_mut().pop());
 
         let Some(inflight) = inflight else {
             return;
@@ -94,7 +90,7 @@ impl AfterGuest for TracingProxy {
             links: vec![],
             status: tracing::Status::Unset,
             instrumentation_scope: tracing::InstrumentationScope {
-                name: PACKAGE_NAME.to_string(),
+                name: PACKAGE_NAME.to_owned(),
                 version: None,
                 schema_url: None,
                 attributes: vec![],

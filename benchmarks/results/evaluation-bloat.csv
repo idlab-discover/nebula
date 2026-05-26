@@ -1,0 +1,4 @@
+variant,size_kb
+uninstrumented,2372
+manual-instrument,2420
+auto-instrumented,2400

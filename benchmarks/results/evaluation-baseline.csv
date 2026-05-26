@@ -1,0 +1,4 @@
+variant,latency_avg_us,latency_stdev_us,p50_us,p75_us,p90_us,p99_us,req_per_sec
+uninstrumented,238.40,67.36,229.00,233.00,241.00,423.00,4145.72
+manual-instrument,300.49,66.84,276.00,292.00,371.00,555.00,3272.22
+auto-instrumented,454.38,82.34,430.00,443.00,527.00,781.00,2141.32

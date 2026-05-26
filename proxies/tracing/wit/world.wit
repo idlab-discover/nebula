@@ -1,7 +1,9 @@
 package nebula:tracing;
 
 world tracing {
-    include wasi:cli/imports@0.2.10;
+    // Goofy workaround which I don't understand, pain
+    include wasi:clocks/imports@0.2.10;
+    include wasi:io/imports@0.2.10;
 
     import wasi:random/random@0.2.10;
     import wasi:clocks/wall-clock@0.2.0;

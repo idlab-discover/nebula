@@ -12,22 +12,22 @@ version = "0.3.0"
 digest = "sha256:f611e188697b7481761f8a78177abae7fbe491c6b521b59213167efcd44df172"
 
 [[packages]]
-name = "wasi:cli"
+name = "wasi:clocks"
 registry = "wasi.dev"
 
 [[packages.versions]]
 requirement = "=0.2.10"
 version = "0.2.10"
-digest = "sha256:0ce8714c597191cf9b7b37c4bd2033a33b086e5af486ac2f1a880308040cad1a"
+digest = "sha256:b1bf6597fab005d7562f955b0ce6c5ae430450bd4a0b8d4f1b34ff2d3612b3f9"
 
 [[packages]]
-name = "wasi:clocks"
+name = "wasi:io"
 registry = "wasi.dev"
 
 [[packages.versions]]
-requirement = "=0.2.0"
-version = "0.2.0"
-digest = "sha256:51911098e929732f65d1d84f8dc393299f18a9e8de632d854714f37142efe97b"
+requirement = "=0.2.10"
+version = "0.2.10"
+digest = "sha256:c3fd3ac8f133431c6b8ee903303d43c86f72835045b55490493d0c17dd8b6dff"
 
 [[packages]]
 name = "wasi:otel"

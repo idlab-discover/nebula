@@ -28,7 +28,7 @@ struct JwtPayload {
 }
 
 const JWT_SECRET: &[u8] = b"nebula-demo-identity-secret";
-const JWT_TTL_SECS: usize = 2 * 60 * 60;
+const JWT_TTL_SECS: usize = 12 * 60 * 60;
 
 // static TRACER: LazyLock<Tracer> =
 // 	LazyLock::new(|| Tracer::new("nebula-order-service"));

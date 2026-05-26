@@ -40,17 +40,17 @@ impl Guest for Gateway {
 			tracer.start_span(path.as_str(), |_span| {
 				if let Ok(request) = Request::from_wasi(req) {
 					let response = router.handle(request);
-					response.send(res);
+					let _ = response.send(res);
 				} else {
 					let json = json!({ "error": "Invalid request" });
 					let response = Response::json(json, 400);
-					response.send(res);
+					let _ = response.send(res);
 				}
 			});
 		} else {
 			let json = json!({ "error": "Invalid request path" });
 			let response = Response::json(json, 400);
-			response.send(res);
+			let _ = response.send(res);
 		}
 	}
 }

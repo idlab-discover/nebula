@@ -2,6 +2,8 @@ use crate::wasi::http::types::{
     Fields, OutgoingBody, OutgoingResponse, ResponseOutparam, StatusCode,
 };
 
+use anyhow::Context;
+
 pub struct Response {
     pub status: u16,
     pub body: Vec<u8>,
@@ -42,7 +44,7 @@ impl Response {
         }
     }
 
-    pub fn send(self, out: ResponseOutparam) {
+    pub fn send(self, out: ResponseOutparam) -> anyhow::Result<()> {
         let headers = Fields::new();
         for (k, v) in self.headers {
             let _ = headers.append(&k, &v.into_bytes());
@@ -56,9 +58,13 @@ impl Response {
         ResponseOutparam::set(out, Ok(response));
 
         let stream = body.write().unwrap();
-        let _ = stream.blocking_write_and_flush(&self.body);
+        stream
+            .blocking_write_and_flush(&self.body)
+            .context("failed to write response body")?;
         drop(stream);
 
-        let _ = OutgoingBody::finish(body, None);
+        OutgoingBody::finish(body, None).context("failed to finish response body")?;
+
+        Ok(())
     }
 }

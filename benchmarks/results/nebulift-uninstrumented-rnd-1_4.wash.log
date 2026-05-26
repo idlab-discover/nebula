@@ -1,0 +1,10 @@
+2026-05-25T23:42:57.873039Z  INFO starting development session for project path="/tmp/tmp.2ECpXizn3v"
+2026-05-25T23:42:57.884153Z  INFO HTTP server listening addr=0.0.0.0:8000 protocol="HTTP"
+2026-05-25T23:42:57.884178Z  INFO Starting WASI OTel tracing plugin
+2026-05-25T23:42:57.884383Z  INFO Starting WASI OTel plugin endpoint= protocol=
+2026-05-25T23:42:57.884633Z  INFO WASI OTel plugin started
+2026-05-25T23:42:57.884689Z  INFO Host provides interfaces count=10 interfaces=["wasi:cli/stderr,terminal-input,exit,terminal-stderr,environment,terminal-stdout,terminal-output,stdout,stdin,terminal-stdin@0.2.0", "wasi:clocks/monotonic-clock,wall-clock@0.2.0", "wasi:clocks/monotonic-clock,wall-time@0.2.0", "wasi:filesystem/preopens,types@0.2.0", "wasi:http/incoming-handler,outgoing-handler,types@0.2.0", "wasi:io/poll,error,streams@0.2.0", "wasi:random/random@0.2.0", "wasi:random/insecure-seed,insecure,random@0.2.0", "wasi:sockets/tcp,udp-create-socket,udp,instance-network,tcp-create-socket,ip-name-lookup,network@0.2.0", "wasmcloud:messaging/handler@0.2.0"]
+2026-05-25T23:42:57.884700Z  INFO development session started, building and deploying component...
+2026-05-25T23:42:57.884740Z  INFO perform_component_build{command="true"}: building component path="/tmp/tmp.2ECpXizn3v"
+2026-05-25T23:42:57.884752Z  INFO perform_component_build{command="true"}: executing build command command="true" component_path="/home/ewout/ugent/thesis/projects/nebula/demo/bin/nebulift-uninstrumented-rnd-1_4.wasm"
+2026-05-25T23:42:58.220157Z  INFO listening for HTTP requests address=http://0.0.0.0:8000

@@ -1,0 +1,11 @@
+2026-05-25T23:31:39.808918Z  INFO starting development session for project path="/tmp/tmp.OvgA9jr4z7"
+2026-05-25T23:31:39.820568Z  INFO HTTP server listening addr=0.0.0.0:8000 protocol="HTTP"
+2026-05-25T23:31:39.820594Z  INFO Starting WASI OTel plugin endpoint= protocol=
+2026-05-25T23:31:39.820862Z  INFO WASI OTel plugin started
+2026-05-25T23:31:39.820867Z  INFO Starting WASI OTel tracing plugin
+2026-05-25T23:31:39.821115Z  INFO Host provides interfaces count=10 interfaces=["wasi:cli/terminal-stderr,terminal-input,exit,stdin,environment,stdout,terminal-stdout,terminal-stdin,stderr,terminal-output@0.2.0", "wasi:clocks/wall-clock,monotonic-clock@0.2.0", "wasi:clocks/monotonic-clock,wall-time@0.2.0", "wasi:filesystem/preopens,types@0.2.0", "wasi:http/types,incoming-handler,outgoing-handler@0.2.0", "wasi:io/streams,error,poll@0.2.0", "wasi:random/random@0.2.0", "wasi:random/insecure-seed,insecure,random@0.2.0", "wasi:sockets/tcp-create-socket,udp-create-socket,instance-network,network,udp,tcp,ip-name-lookup@0.2.0", "wasmcloud:messaging/handler@0.2.0"]
+2026-05-25T23:31:39.821126Z  INFO development session started, building and deploying component...
+2026-05-25T23:31:39.821166Z  INFO perform_component_build{command="true"}: building component path="/tmp/tmp.OvgA9jr4z7"
+2026-05-25T23:31:39.821180Z  INFO perform_component_build{command="true"}: executing build command command="true" component_path="/home/ewout/ugent/thesis/projects/nebula/demo/bin/nebulift-manual-instrument-rnd-1_10.wasm"
+2026-05-25T23:31:40.169777Z  INFO reload_component{workload_id=None}:workload_start{workload.id="f67ee063-2995-4867-994d-c4c65e88f8fc" workload.name="dev" workload.namespace="default"}:resolve_workload{workload.id="f67ee063-2995-4867-994d-c4c65e88f8fc" workload.name="dev" workload.namespace="default"}:bind_plugins:plugin_on_workload_item_bind{plugin_id="wasi-otel"}: WASI OTel tracing interfaces bound to workload item component_id="fc1c175c-df8c-462c-ae6f-2a9af4b8fe0f" component_name=wash-dev-component
+2026-05-25T23:31:40.169928Z  INFO listening for HTTP requests address=http://0.0.0.0:8000

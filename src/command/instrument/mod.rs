@@ -6,7 +6,6 @@ use clap::{Args, ValueEnum};
 use splicer::cviz::model::CompositionGraph;
 use splicer::cviz::parse::component::parse_component;
 use splicer::lowlevel::{Injection, SpliceRule, split_out_composition};
-use tracing::info;
 use wac_graph::EncodeOptions;
 use wac_parser::Document;
 use wac_resolver::FileSystemPackageResolver;
@@ -101,6 +100,8 @@ impl CliCommand for InstrumentCommand {
             "nebula:instrumented",
         )?;
 
+        println!("{}", wac_out.wac);
+
         // 4. Compose the generated WAC and its dependencies into a single Wasm
         //    component, and write it to the specified output path.
         let working_dir = std::env::current_dir().context("failed to resolve current directory")?;
@@ -121,19 +122,19 @@ impl CliCommand for InstrumentCommand {
 }
 
 ///
-fn injection_suffix(index: usize) -> String {
-    if index < 26 {
-        return ((b'a' + index as u8) as char).to_string();
-    }
+// fn injection_suffix(index: usize) -> String {
+//     if index < 26 {
+//         return ((b'a' + index as u8) as char).to_string();
+//     }
 
-    // Skip "aa"
-    let n = index - 25;
+//     // Skip "aa"
+//     let n = index - 25;
 
-    let first = ((n / 25) % 26) as u8;
-    let second = ((n % 25) + 1) as u8;
+//     let first = ((n / 25) % 26) as u8;
+//     let second = ((n % 25) + 1) as u8;
 
-    format!("{}{}", (b'a' + first) as char, (b'a' + second) as char)
-}
+//     format!("{}{}", (b'a' + first) as char, (b'a' + second) as char)
+// }
 
 fn build_splice_rules(graph: &CompositionGraph) -> Result<Vec<SpliceRule>> {
     let tracing_path = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("proxies/bin/tracing.wasm");
@@ -154,32 +155,35 @@ fn build_splice_rules(graph: &CompositionGraph) -> Result<Vec<SpliceRule>> {
     let mut injection_idx = 0;
 
     let mut push_rule = |interface: String, provider_name: String| {
-        let name = format!("tracing-{}", injection_suffix(injection_idx));
         injection_idx += 1;
 
         rules.push(SpliceRule::Before {
             interface,
             provider_name: Some(provider_name),
             provider_alias: None,
-            inject: vec![Injection::from_path(name, tracing_path.clone())],
+            inject: vec![Injection::from_path("tracing", tracing_path.clone())],
         });
     };
 
     for (iface, export) in &graph.component_exports {
-        let provider = graph.nodes[&export.source_instance].name.clone();
-        push_rule(iface.clone(), provider);
+        if !iface.contains("wasi") || iface.contains("wasi:http") {
+            let provider = graph.nodes[&export.source_instance].name.clone();
+            push_rule(iface.clone(), provider);
+        }
     }
 
     for node in graph.real_nodes() {
         for import in &node.imports {
-            if let Some(source) = &import.source_instance {
+            let iface = import.interface_name.clone();
+
+            if (!iface.contains("wasi") || iface.contains("wasi:http"))
+                && let Some(source) = &import.source_instance
+            {
                 let provider = graph.nodes[source].name.clone();
-                push_rule(import.interface_name.clone(), provider);
+                push_rule(iface, provider);
             }
         }
     }
-
-    info!(?rules);
 
     Ok(rules)
 }
