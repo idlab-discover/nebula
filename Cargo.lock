@@ -397,17 +397,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "builtin-manifest"
-version = "0.1.0"
-dependencies = [
- "proc-macro2",
- "quote",
- "serde",
- "toml 0.8.23",
- "wasmparser 0.247.0",
-]
-
-[[package]]
 name = "bumpalo"
 version = "3.20.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -768,7 +757,7 @@ dependencies = [
  "serde",
  "serde_json",
  "sha2",
- "wirm",
+ "wirm 5.0.0",
 ]
 
 [[package]]
@@ -3745,7 +3734,6 @@ name = "splicer"
 version = "2.4.0"
 dependencies = [
  "anyhow",
- "builtin-manifest",
  "clap",
  "colored",
  "cviz",
@@ -3755,7 +3743,6 @@ dependencies = [
  "serde_yaml",
  "tempfile",
  "tokio",
- "toml 0.8.23",
  "tracing",
  "tracing-subscriber",
  "wac-graph 0.10.0",
@@ -3763,7 +3750,7 @@ dependencies = [
  "wac-resolver 0.10.0",
  "wasm-encoder 0.247.0",
  "wasmparser 0.247.0",
- "wirm",
+ "wirm 4.0.6",
  "wit-bindgen-core 0.57.1",
  "wit-component 0.247.0",
  "wit-parser 0.247.0",
@@ -5478,6 +5465,18 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "a90e88e4667264a994d34e6d1ab2d26d398dcdca8b7f52bec8668957517fc7d8"
 dependencies = [
  "memchr",
+]
+
+[[package]]
+name = "wirm"
+version = "4.0.6"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "3398cfb47e9ac60f209294450b58f9577ba3019e299da09e9b1efeeba726930a"
+dependencies = [
+ "log",
+ "paste",
+ "wasm-encoder 0.247.0",
+ "wasmparser 0.247.0",
 ]
 
 [[package]]

@@ -5,6 +5,8 @@ members = [
     "crates/otel",
     "crates/identity",
     "crates/pricing",
+    "crates/adder",
+    "crates/calculator",
     "crates/matcher",
     "crates/driver",
     "crates/payment",

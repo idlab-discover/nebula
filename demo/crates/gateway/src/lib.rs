@@ -20,8 +20,8 @@ wit_bindgen::generate!({
 	}
 });
 
-// static TRACER: LazyLock<Tracer> =
-// 	LazyLock::new(|| Tracer::new("nebula-order-service"));
+static TRACER: LazyLock<Tracer> =
+	LazyLock::new(|| Tracer::new("nebula-order-service"));
 
 pub struct Gateway;
 
@@ -34,10 +34,8 @@ impl Guest for Gateway {
 		router = router.post("/ride", controller::request_ride);
 		router = router.get("/token", controller::get_token);
 
-		let tracer = Tracer::new("demo-gateway");
-
 		if let Some(path) = req.path_with_query() {
-			tracer.start_span(path.as_str(), |_span| {
+			TRACER.start_span(path.as_str(), |_span| {
 				if let Ok(request) = Request::from_wasi(req) {
 					let response = router.handle(request);
 					let _ = response.send(res);

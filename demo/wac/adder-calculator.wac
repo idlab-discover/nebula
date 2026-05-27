@@ -1,0 +1,9 @@
+package docs:app;
+
+let adder = new docs:adder { ... };
+
+let calculator = new docs:calculator {
+    "docs:adder/add@0.1.0": adder["docs:adder/add@0.1.0"],
+};
+
+export calculator["docs:calculator/calculate@0.1.0"];

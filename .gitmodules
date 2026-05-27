@@ -1,19 +1,11 @@
-[submodule "wirm"]
-	path = deps/wirm
-	url = git@github.com:EwoutV/wirm.git
-	branch = main
 [submodule "splicer"]
 	path = deps/splicer
 	url = git@github.com:EwoutV/splicer.git
 	branch = main
-[submodule "cviz"]
-	path = deps/cviz
-	url = git@github.com:EwoutV/cviz.git
-	branch = main
 [submodule "deps/wasmCloud"]
 	path = deps/wasmCloud
 	url = git@github.com:EwoutV/wasmCloud.git
-	branch = feat/wasi-otel-0.2.0-rc.3
+	branch = feat/wasi-otel-0.3.0
 [submodule "deps/wasi-otel"]
 	path = deps/wasi-otel
 	url = git@github.com:EwoutV/wasi-otel.git
