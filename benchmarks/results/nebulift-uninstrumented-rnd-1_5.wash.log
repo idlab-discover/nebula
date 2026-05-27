@@ -1,10 +1,11 @@
-2026-05-25T23:43:59.545148Z  INFO starting development session for project path="/tmp/tmp.7Rq8bZhuEG"
-2026-05-25T23:43:59.556309Z  INFO HTTP server listening addr=0.0.0.0:8000 protocol="HTTP"
-2026-05-25T23:43:59.556333Z  INFO Starting WASI OTel plugin endpoint= protocol=
-2026-05-25T23:43:59.556614Z  INFO WASI OTel plugin started
-2026-05-25T23:43:59.556620Z  INFO Starting WASI OTel tracing plugin
-2026-05-25T23:43:59.556890Z  INFO Host provides interfaces count=10 interfaces=["wasi:cli/terminal-input,environment,stdin,stdout,terminal-stderr,terminal-stdout,stderr,terminal-output,exit,terminal-stdin@0.2.0", "wasi:clocks/monotonic-clock,wall-clock@0.2.0", "wasi:clocks/monotonic-clock,wall-time@0.2.0", "wasi:filesystem/preopens,types@0.2.0", "wasi:http/outgoing-handler,types,incoming-handler@0.2.0", "wasi:io/error,poll,streams@0.2.0", "wasi:random/insecure-seed,insecure,random@0.2.0", "wasi:random/random@0.2.0", "wasi:sockets/ip-name-lookup,instance-network,udp,network,udp-create-socket,tcp,tcp-create-socket@0.2.0", "wasmcloud:messaging/handler@0.2.0"]
-2026-05-25T23:43:59.556902Z  INFO development session started, building and deploying component...
-2026-05-25T23:43:59.556943Z  INFO perform_component_build{command="true"}: building component path="/tmp/tmp.7Rq8bZhuEG"
-2026-05-25T23:43:59.556960Z  INFO perform_component_build{command="true"}: executing build command command="true" component_path="/home/ewout/ugent/thesis/projects/nebula/demo/bin/nebulift-uninstrumented-rnd-1_5.wasm"
-2026-05-25T23:43:59.890199Z  INFO listening for HTTP requests address=http://0.0.0.0:8000
+2026-05-27T16:00:03.431107Z  INFO starting development session for project path="/tmp/tmp.WppxhJN9GX"
+2026-05-27T16:00:03.444411Z  INFO HTTP server listening addr=0.0.0.0:8000 protocol="HTTP"
+2026-05-27T16:00:03.444456Z  INFO Starting WASI OTel plugin endpoint= protocol=
+2026-05-27T16:00:03.444775Z  INFO WASI OTel plugin started
+2026-05-27T16:00:03.444787Z  INFO Starting WASI OTel tracing plugin
+2026-05-27T16:00:03.445076Z  INFO Host provides interfaces count=10 interfaces=["wasi:cli/environment,terminal-output,exit,terminal-stderr,terminal-input,stderr,stdout,stdin,terminal-stdin,terminal-stdout@0.2.0", "wasi:clocks/monotonic-clock,wall-time@0.2.0", "wasi:clocks/wall-clock,monotonic-clock@0.2.0", "wasi:filesystem/preopens,types@0.2.0", "wasi:http/types,outgoing-handler,incoming-handler@0.2.0", "wasi:io/poll,error,streams@0.2.0", "wasi:random/random@0.2.0", "wasi:random/random,insecure-seed,insecure@0.2.0", "wasi:sockets/tcp-create-socket,udp-create-socket,network,udp,instance-network,ip-name-lookup,tcp@0.2.0", "wasmcloud:messaging/handler@0.2.0"]
+2026-05-27T16:00:03.445095Z  INFO development session started, building and deploying component...
+2026-05-27T16:00:03.445143Z  INFO perform_component_build{command="true"}: building component path="/tmp/tmp.WppxhJN9GX"
+2026-05-27T16:00:03.445157Z  INFO perform_component_build{command="true"}: executing build command command="true" component_path="/home/ewout/ugent/thesis/projects/nebula/demo/bin/nebulift-uninstrumented-rnd-1_5.wasm"
+2026-05-27T16:00:03.795753Z  INFO listening for HTTP requests address=http://0.0.0.0:8000
+2026-05-27T16:00:14.463982Z ERROR error serving HTTP client addr=127.0.0.1:32880 err=hyper::Error(IncompleteMessage)

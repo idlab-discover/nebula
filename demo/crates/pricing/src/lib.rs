@@ -1,3 +1,6 @@
+use std::thread;
+use std::time::Duration;
+
 use wasi_otel_framework::tracing::Tracer;
 
 use crate::exports::nebula::demo::pricing::Guest;
@@ -19,6 +22,7 @@ impl Guest for Pricing {
 		let tracer = Tracer::new("demo-pricing");
 
 		tracer.start_span("pricing::calculate", |_span| {
+			// thread::sleep(Duration::from_micros(250));
 			let distance_km = distance / 1000.0;
 
 			let base_fare = 2.5;

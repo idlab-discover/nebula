@@ -1,6 +1,10 @@
 mod controller;
 mod schema;
 
+use std::sync::LazyLock;
+use std::thread;
+use std::time::Duration;
+
 use serde_json::json;
 use wasi_http_framework::wasi::http::types::{
 	IncomingRequest,
@@ -36,6 +40,7 @@ impl Guest for Gateway {
 
 		if let Some(path) = req.path_with_query() {
 			TRACER.start_span(path.as_str(), |_span| {
+				thread::sleep(Duration::from_micros(250));
 				if let Ok(request) = Request::from_wasi(req) {
 					let response = router.handle(request);
 					let _ = response.send(res);

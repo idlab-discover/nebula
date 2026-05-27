@@ -13,7 +13,7 @@ REPO_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
 DEMO_BIN_DIR="$REPO_ROOT/demo/bin"
 ASPIRE_COMPOSE_FILE="$REPO_ROOT/demo/otel/docker-compose-aspire.yml"
 
-CONCURRENCY_LEVELS=(1 2 4 8 16 32)
+CONCURRENCY_LEVELS=(1)
 REQUEST_BODY='{"vehicle":"Suv","pickup":{"latitude":51.0416,"longitude":3.6697},"dropoff":{"latitude":51.0543,"longitude":3.7174}}'
 
 if [ ! -d "$DEMO_BIN_DIR" ]; then
@@ -22,7 +22,7 @@ if [ ! -d "$DEMO_BIN_DIR" ]; then
 fi
 
 shopt -s nullglob
-COMPONENTS=("$DEMO_BIN_DIR"/nebulift-auto*.wasm)
+COMPONENTS=("$DEMO_BIN_DIR"/nebulift*.wasm)
 
 if [ "${#COMPONENTS[@]}" -eq 0 ]; then
   echo "No wasm components found in $DEMO_BIN_DIR" >&2

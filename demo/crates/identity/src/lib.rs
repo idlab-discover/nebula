@@ -1,3 +1,6 @@
+use std::thread;
+use std::time::Duration;
+
 use jsonwebtoken::{
 	Algorithm,
 	DecodingKey,
@@ -42,6 +45,7 @@ impl Guest for Identity {
 		let tracer = Tracer::new("demo-identity");
 
 		tracer.start_span("identity::validate", |_span| {
+			// thread::sleep(Duration::from_micros(250));
 			let validation = Validation::new(Algorithm::HS256);
 			let claims = decode::<JwtPayload>(
 				&token,

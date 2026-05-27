@@ -57,6 +57,78 @@ pub fn mock_drivers() -> Vec<Driver> {
 			location: Coordinates { latitude: 51.1651, longitude: 4.1432 },
 		},
 		Driver {
+    user: User {
+        id: "driver-058".to_string(),
+        name: "Milan Vandenberghe".to_string(),
+        email: "milan@example.com".to_string(),
+    },
+    vehicle: Vehicle::Suv,
+    location: Coordinates { latitude: 50.8503, longitude: 4.3517 }, // Brussels
+},
+Driver {
+    user: User {
+        id: "driver-059".to_string(),
+        name: "Eline De Smet".to_string(),
+        email: "eline@example.com".to_string(),
+    },
+    vehicle: Vehicle::Suv,
+    location: Coordinates { latitude: 51.2194, longitude: 4.4025 }, // Antwerp
+},
+Driver {
+    user: User {
+        id: "driver-060".to_string(),
+        name: "Robbe Vermeiren".to_string(),
+        email: "robbe@example.com".to_string(),
+    },
+    vehicle: Vehicle::Suv,
+    location: Coordinates { latitude: 51.0543, longitude: 3.7174 }, // Ghent
+},
+Driver {
+    user: User {
+        id: "driver-061".to_string(),
+        name: "Lien Van den Broeck".to_string(),
+        email: "lien@example.com".to_string(),
+    },
+    vehicle: Vehicle::Suv,
+    location: Coordinates { latitude: 51.2093, longitude: 3.2247 }, // Bruges
+},
+Driver {
+    user: User {
+        id: "driver-062".to_string(),
+        name: "Jasper Declercq".to_string(),
+        email: "jasper@example.com".to_string(),
+    },
+    vehicle: Vehicle::Suv,
+    location: Coordinates { latitude: 50.8798, longitude: 4.7005 }, // Leuven
+},
+Driver {
+    user: User {
+        id: "driver-063".to_string(),
+        name: "Hanne Willems".to_string(),
+        email: "hanne@example.com".to_string(),
+    },
+    vehicle: Vehicle::Suv,
+    location: Coordinates { latitude: 50.9307, longitude: 5.3378 }, // Hasselt
+},
+Driver {
+    user: User {
+        id: "driver-064".to_string(),
+        name: "Tomas Peeters".to_string(),
+        email: "tomas@example.com".to_string(),
+    },
+    vehicle: Vehicle::Suv,
+    location: Coordinates { latitude: 50.8282, longitude: 3.2649 }, // Kortrijk
+},
+Driver {
+    user: User {
+        id: "driver-065".to_string(),
+        name: "Nora Maes".to_string(),
+        email: "nora@example.com".to_string(),
+    },
+    vehicle: Vehicle::Suv,
+    location: Coordinates { latitude: 51.2240, longitude: 2.9287 }, // Ostend
+},
+		Driver {
 			user:     User {
 				id:    "driver-019".to_string(),
 				name:  "Elise Dupont".to_string(),

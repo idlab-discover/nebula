@@ -1,11 +1,12 @@
-2026-05-26T11:57:34.015563Z  INFO starting development session for project path="/tmp/tmp.iPB4fCpDIl"
-2026-05-26T11:57:34.044623Z  INFO HTTP server listening addr=0.0.0.0:8000 protocol="HTTP"
-2026-05-26T11:57:34.044687Z  INFO Starting WASI OTel plugin endpoint= protocol=
-2026-05-26T11:57:34.045087Z  INFO WASI OTel plugin started
-2026-05-26T11:57:34.045097Z  INFO Starting WASI OTel tracing plugin
-2026-05-26T11:57:34.045446Z  INFO Host provides interfaces count=10 interfaces=["wasi:cli/stderr,terminal-stdout,terminal-stderr,environment,exit,terminal-output,terminal-stdin,stdout,stdin,terminal-input@0.2.0", "wasi:clocks/monotonic-clock,wall-clock@0.2.0", "wasi:clocks/wall-time,monotonic-clock@0.2.0", "wasi:filesystem/preopens,types@0.2.0", "wasi:http/types,incoming-handler,outgoing-handler@0.2.0", "wasi:io/poll,error,streams@0.2.0", "wasi:random/random@0.2.0", "wasi:random/random,insecure,insecure-seed@0.2.0", "wasi:sockets/udp,tcp,network,instance-network,tcp-create-socket,ip-name-lookup,udp-create-socket@0.2.0", "wasmcloud:messaging/handler@0.2.0"]
-2026-05-26T11:57:34.045471Z  INFO development session started, building and deploying component...
-2026-05-26T11:57:34.045533Z  INFO perform_component_build{command="true"}: building component path="/tmp/tmp.iPB4fCpDIl"
-2026-05-26T11:57:34.045551Z  INFO perform_component_build{command="true"}: executing build command command="true" component_path="/home/ewout/ugent/thesis/projects/nebula/demo/bin/nebulift-auto-instrumented-rnd-1_0.wasm"
-2026-05-26T11:57:34.417767Z  INFO reload_component{workload_id=None}:workload_start{workload.id="b050d1bc-8f93-47bd-ab88-99ea15c6ed3d" workload.name="dev" workload.namespace="default"}:resolve_workload{workload.id="b050d1bc-8f93-47bd-ab88-99ea15c6ed3d" workload.name="dev" workload.namespace="default"}:bind_plugins:plugin_on_workload_item_bind{plugin_id="wasi-otel"}: WASI OTel tracing interfaces bound to workload item component_id="8df9882c-0dba-4fe4-b55c-ab57664ab604" component_name=wash-dev-component
-2026-05-26T11:57:34.417937Z  INFO listening for HTTP requests address=http://0.0.0.0:8000
+2026-05-27T15:56:10.576505Z  INFO starting development session for project path="/tmp/tmp.RUwEQ0F0ZO"
+2026-05-27T15:56:10.592552Z  INFO HTTP server listening addr=0.0.0.0:8000 protocol="HTTP"
+2026-05-27T15:56:10.592601Z  INFO Starting WASI OTel tracing plugin
+2026-05-27T15:56:10.592876Z  INFO Starting WASI OTel plugin endpoint= protocol=
+2026-05-27T15:56:10.593219Z  INFO WASI OTel plugin started
+2026-05-27T15:56:10.593311Z  INFO Host provides interfaces count=10 interfaces=["wasi:cli/stdin,environment,stderr,terminal-stderr,terminal-stdin,terminal-stdout,terminal-output,exit,terminal-input,stdout@0.2.0", "wasi:clocks/monotonic-clock,wall-time@0.2.0", "wasi:clocks/monotonic-clock,wall-clock@0.2.0", "wasi:filesystem/preopens,types@0.2.0", "wasi:http/types,outgoing-handler,incoming-handler@0.2.0", "wasi:io/error,streams,poll@0.2.0", "wasi:random/random@0.2.0", "wasi:random/insecure-seed,random,insecure@0.2.0", "wasi:sockets/udp,network,udp-create-socket,instance-network,tcp-create-socket,tcp,ip-name-lookup@0.2.0", "wasmcloud:messaging/handler@0.2.0"]
+2026-05-27T15:56:10.593329Z  INFO development session started, building and deploying component...
+2026-05-27T15:56:10.593376Z  INFO perform_component_build{command="true"}: building component path="/tmp/tmp.RUwEQ0F0ZO"
+2026-05-27T15:56:10.593396Z  INFO perform_component_build{command="true"}: executing build command command="true" component_path="/home/ewout/ugent/thesis/projects/nebula/demo/bin/nebulift-auto-instrumented-rnd-1_0.wasm"
+2026-05-27T15:56:10.995842Z  INFO reload_component{workload_id=None}:workload_start{workload.id="e5c13d05-78d4-4a09-a553-17da403ade4b" workload.name="dev" workload.namespace="default"}:resolve_workload{workload.id="e5c13d05-78d4-4a09-a553-17da403ade4b" workload.name="dev" workload.namespace="default"}:bind_plugins:plugin_on_workload_item_bind{plugin_id="wasi-otel"}: WASI OTel tracing interfaces bound to workload item component_id="e7337bc3-245e-402d-a8df-d9ba90793882" component_name=wash-dev-component
+2026-05-27T15:56:10.996018Z  INFO listening for HTTP requests address=http://0.0.0.0:8000
+2026-05-27T15:56:21.641744Z ERROR error serving HTTP client addr=127.0.0.1:40126 err=hyper::Error(IncompleteMessage)

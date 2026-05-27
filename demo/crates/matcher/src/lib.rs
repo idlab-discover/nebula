@@ -1,3 +1,6 @@
+use std::thread;
+use std::time::Duration;
+
 use wasi_otel_framework::tracing::Tracer;
 
 use crate::exports::nebula::demo::matcher::Guest;
@@ -44,6 +47,7 @@ impl Guest for Matcher {
 		let tracer = Tracer::new("demo-matcher");
 
 		tracer.start_span("matcher::find", |_span| {
+			// thread::sleep(Duration::from_micros(250));
 			let mut candidates = crate::mock::mock_drivers();
 
 			while !candidates.is_empty() {
