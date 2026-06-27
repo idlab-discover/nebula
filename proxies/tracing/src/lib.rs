@@ -1,7 +1,6 @@
 mod bindings;
 
 use std::cell::RefCell;
-use std::thread_local;
 
 use bindings::exports::splicer::tier1::after::Guest as AfterGuest;
 use bindings::exports::splicer::tier1::before::Guest as BeforeGuest;
@@ -22,8 +21,11 @@ struct InflightSpan {
 }
 
 thread_local! {
-    static INFLIGHT_SPANS: RefCell<Vec<InflightSpan>> = const { RefCell::new(Vec::new()) };
-    static PRNG: RefCell<fastrand::Rng> = RefCell::new(fastrand::Rng::with_seed(random::get_random_u64()));
+    static INFLIGHT_SPANS: RefCell<Vec<InflightSpan>> =
+        const { RefCell::new(Vec::new()) };
+
+    static PRNG: fastrand::Rng =
+        fastrand::Rng::with_seed(random::get_random_u64());
 }
 
 struct TracingProxy;
@@ -35,7 +37,7 @@ impl BeforeGuest for TracingProxy {
         let start_time = wall_clock::now();
 
         // Generate random u64 strictly in guest memory
-        let raw_span_id = PRNG.with(|rng| rng.borrow_mut().u64(..));
+        let raw_span_id = PRNG.with(|rng| rng.to_owned().u64(..));
         let span_id = format!("{:016x}", raw_span_id);
 
         let name = format!("{}.{}", call.interface_name, call.function_name);
@@ -55,15 +57,14 @@ impl BeforeGuest for TracingProxy {
         // Pass by reference to the host
         tracing::on_start(&context);
 
-        // Move the context directly into the struct (0 clones)
-        let inflight_span = InflightSpan {
-            context,
-            parent_span_id,
-            start_time,
-            name,
-        };
-
-        INFLIGHT_SPANS.with(|spans| spans.borrow_mut().push(inflight_span));
+        INFLIGHT_SPANS.with(|spans| {
+            spans.borrow_mut().push(InflightSpan {
+                context,
+                parent_span_id,
+                start_time,
+                name,
+            });
+        });
     }
 }
 
@@ -72,9 +73,7 @@ impl AfterGuest for TracingProxy {
     async fn on_return(_call: CallId) {
         let end_time = wall_clock::now();
 
-        let inflight = INFLIGHT_SPANS.with(|spans| spans.borrow_mut().pop());
-
-        let Some(inflight) = inflight else {
+        let Some(inflight) = INFLIGHT_SPANS.with(|spans| spans.borrow_mut().pop()) else {
             return;
         };
 

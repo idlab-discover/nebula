@@ -1,8 +1,8 @@
 # PoC / WasmLens
 
-**wasmlens** is a CLI tool that automatically instruments arbitrary WebAssembly components with distributed tracing through the `wasi:otel` interface, requiring no modifications to the component’s source code.
+**WasmLens** is a CLI tool that automatically instruments arbitrary WebAssembly components with distributed tracing through the `wasi:otel` interface, requiring no modifications to the component’s source code. It is part of a master's thesis supervised by researchers at IDLab (University of Ghent, Belgium).
 
-It operates by interposing every component import and top-level export with a tier-1 tracing middleware generated using [`splicer`](https://github.com/ejrgilbert/splicer). Leveraging splicer’s adapter generation capabilities, WasmLens constructs proxy components that mirror the complete import/export surface of the target component and transparently inject `wasi:otel` entry and exit spans around each proxied function call. The original component remains untouched; instrumentation is applied entirely at the composed-component layer through proxy wrapping.
+WasmLens operates by interposing every component import and top-level export with a tier-1 tracing middleware generated using [`splicer`](https://github.com/ejrgilbert/splicer). WasmLens constructs proxy components that mirror the complete import/export surface of the target component and transparently inject `wasi:otel` entry and exit spans around each proxied function call. The original component remains untouched; instrumentation is applied entirely at the composed-component layer through proxy wrapping.
 
 Special thanks to Elizabeth Gilbert, the creator of `splicer`, for making this possible! This project aims to demonstrate a practical real-world use case for automatic instrumentation of arbitrary WebAssembly components.
 
@@ -14,13 +14,13 @@ The `wasi:otel/tracing` interface is the standard mechanism for WebAssembly comp
 
 A fundamental problem arises with **static composition** (e.g. components linked with [`wac`](https://github.com/bytecodealliance/wac)): the original [`wasi:otel@0.2.0-rc.2`](https://github.com/WebAssembly/wasi-otel/blob/7e6d50d0b8482944a2c245617736f22d80560fc5/wit/tracing.wit#L1) proposal exposed only `outer-span-context`, which always returns the host's outermost span context, not the innermost span currently active across logical component boundaries. When component A starts a span and then calls into component B, B has no way to discover A's span and therefore cannot establish the correct parent-child relationship. The resulting trace loses causality.
 
-### The `inner-span-context` proposal
+### The `current-span-context` proposal
 
 This project targets a revised `wasi:otel` proposal, defined in [`wit/wasi-otel/tracing.wit`](wit/wasi-otel/tracing.wit), that adds:
 
 ```wit
 /// Returns the span context of the current span.
-inner-span-context: func() -> span-context;
+current-span-context: func() -> span-context;
 ```
 
 The host maintains a **stack** of active span contexts:
@@ -67,11 +67,18 @@ nebula instrument ./bin/components/
 
 ## Building
 
+Requires a Rust toolchain with the version specified in [`rust-toolchain.toml`](rust-toolchain.toml).
+
 ```sh
 cargo build --release
 ```
 
-Requires a Rust toolchain with the version specified in [`rust-toolchain.toml`](rust-toolchain.toml).
+## Future Work
+
+- Target Splicer's Tier 2 for richer span creation.
+- More configuration options: blacklist / whitelist interfaces or functions, span creation templates, ...
+- Look into WASIP3 implications for automatic tracing instrumentation.
+- More demo applications showing generalization of WasmLens / Splicer.
 
 ## License
 

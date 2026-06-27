@@ -1,6 +1,3 @@
-use std::thread;
-use std::time::Duration;
-
 use wasi_otel_framework::tracing::Tracer;
 
 use crate::exports::nebula::demo::pricing::Guest;

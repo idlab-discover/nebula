@@ -19,13 +19,13 @@ build:
 
 build-instrumented:
 	$(MAKE) --no-print-directory build FEATURES="--features wasi-otel-framework/traces"
-	$(MAKE) --no-print-directory build-driver-variants FEATURES="--features wasi-otel-framework/traces" DRIVER_VARIANT_PREFIX="driver-manual-instrument"
-	$(MAKE) --no-print-directory compose-driver-variants DRIVER_VARIANT_PREFIX="driver-manual-instrument" COMPOSED_VARIANT_PREFIX="nebulift-manual-instrument"
+	#$(MAKE) --no-print-directory build-driver-variants FEATURES="--features wasi-otel-framework/traces" DRIVER_VARIANT_PREFIX="driver-manual-instrument"
+	#$(MAKE) --no-print-directory compose-driver-variants DRIVER_VARIANT_PREFIX="driver-manual-instrument" COMPOSED_VARIANT_PREFIX="nebulift-manual-instrument"
 
 build-uninstrumented:
 	$(MAKE) --no-print-directory build FEATURES=""
-	$(MAKE) --no-print-directory build-driver-variants FEATURES="" DRIVER_VARIANT_PREFIX="driver-uninstrumented"
-	$(MAKE) --no-print-directory compose-driver-variants DRIVER_VARIANT_PREFIX="driver-uninstrumented" COMPOSED_VARIANT_PREFIX="nebulift-uninstrumented"
+	#$(MAKE) --no-print-directory build-driver-variants FEATURES="" DRIVER_VARIANT_PREFIX="driver-uninstrumented"
+	#$(MAKE) --no-print-directory compose-driver-variants DRIVER_VARIANT_PREFIX="driver-uninstrumented" COMPOSED_VARIANT_PREFIX="nebulift-uninstrumented"
 
 build-driver-variants:
 	@mkdir -p $(BIN_DIR)

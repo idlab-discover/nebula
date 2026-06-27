@@ -1,61 +1,80 @@
 # nebula/demo
 
-A demonstration application for the [nebula](../README.md) automatic instrumentation tool. It consists of a simple **orders API** built with two WebAssembly components `gateway` and `service` that are statically composed using [`wac`](https://github.com/bytecodealliance/wac).
+A demonstration application for the [nebula](../README.md) automatic instrumentation tool. It consists of a simple **ride hailing application** consisting of six statically WebAssembly components `gateway`, `identity`, `pricing`, `matcher`, `driver` and `pricing`.
 
 ## Architecture
 
+![Static Composition Diagram](composition.png)
+
+All components import `wasi:otel/tracing@0.2.0-rc.3` and are composed together with `wac`. The composed binary is served by a WASM runtime that provides the `wasi:otel` host implementation.
+
+1. A `POST` request with a ride request body and authorization header is sent to the **runtime host** over HTTP.
+2. **Runtime host** to **gateway component**
+   Invokes `haandle` on `wasi:http/incoming-handler`. The gateway parses the request body and authorization header for further processing.
+3. **Gateway component** to **identity component**
+   Invokes `check` on `wasmlens:demo/identity` with the authorization header. The identity component validates the JWT token and returns either a user ID or an error.
+4. **Gateway Component** to **pricing component**
+   Invokes `calculate` on `wasmlens:demo/pricing` with the user ID and ride request body. The pricing component computes a tentative price based on the vehicle type and the distance between the `pickup` and `dropoff` locations, and returns the price.
+5. **Gateway component** to **matching component**
+   Invokes `find` on `wasmlens:demo/matching` with the user ID, ride request body, and price. It tries to find a driver with the same vehicle type and withing the shortest distance from the pickup location, an returns a candidate driver.
+6. **Matching component** to **payment component**
+   Invokes `check` on `wasmlens:demo/driver` with a candidate driver, the ride request body, and price. The driver component evaluates the driver’s preferences (distance, price, and other factors) and returns a boolean indicating acceptance. This step repeats until a driver accepts the ride, or no driver was found for the ride request.
+7. **Gateway component** to **payment component**
+   Invokes `generate-payment-url` on `wasmlens:demo/payment` with the user ID and price. The payment component processes the payment request and returns a payment URL.
+8. **Gateway component** to **runtime host** to **client**
+   The gateway serializes the response and returns it to the runtime host, which forwards it to the client.
+
+### Build
+
+All individual components already contain hand-written `wasi:otel` spans, which can be enabled or disabled through a feature flag (see the Makefile).
+
+**Prerequisities**:
+
+1. Install `wasm-pkg-tools` (`wkg`)
+2. The rust toolchain (via `rustup`)
+3. Add namespace registries to the `wkg` config file (often under `$HOME/.config/wasm-pkg/config.toml`):
+
+   ```
+   [package_registry_overrides]
+   "wasi:otel" = { registry = "ewoutv", metadata = { preferredProtocol = "oci", oci = { registry = "ghcr.io", namespacePrefix = "EwoutV/" } } }
+   ```
+
+Manual tracing enabled (every component creates its own span in the source code):
+
 ```
-HTTP request
-     │
-     ▼
-┌──────────┐   nebula:service/orders   ┌──────────┐
-│ gateway  │ ────────────────────────► │ service  │
-│ (wasm)   │   nebula:service/quotes   │ (wasm)   │
-└──────────┘                           └──────────┘
-     │                                      │
-     └──────────────┬───────────────────────┘
-                    ▼
-           wac static composition
-                    │
-                    ▼
-             orders.wasm (composed)
-```
-
-- **`gateway`**: Handles incoming `wasi:http` requests, routes them to the appropriate handler, and calls into `service` for business logic. Instrumented with developer-added `wasi:otel` spans.
-- **`service`**: Implements the `nebula:service/orders` and `nebula:service/quotes` WIT interfaces. Each handler is broken down into child spans (`calculate-subtotal`, `calculate-tax`, `calculate-total`).
-- **`otel`** (`wasi-otel-framework`): A library crate that wraps the raw `wasi:otel` WIT bindings with an ergonomic Rust API (`Tracer`, `Span`).
-
-Both components import `wasi:otel/tracing@0.3.0` and are composed together with `wac`. The composed binary is served by a WASM runtime that provides the `wasi:otel` host implementation.
-
-## Planned use cases
-
-This demo application is the target for three scenarios that nebula will showcase once automatic instrumentation is complete:
-
-### 1. Automatic instrumentation alongside developer instrumentation
-
-`gateway` and `service` already contain hand-written `wasi:otel` spans. Nebula will wrap the composed binary with an additional proxy layer that adds entry/exit spans around every exported function call. The two layers of spans work together in the same trace, demonstrating that automatic instrumentation does not interfere with or replace developer instrumentation.
-
-### 2. Ergonomic tracing library
-
-The `crates/otel` crate (`wasi-otel-framework`) demonstrates a thin ergonomic wrapper around the raw `wasi:otel` WIT bindings:
-
-```rust
-let tracer = Tracer::new("my-service");
-
-tracer.start_span("handle-request", |span| {
-    span.set_attribute("http.path".to_string(), "/orders".to_string());
-
-    tracer.start_span("create-order", |span| {
-        span.set_attribute("order.id".to_string(), "abc123".to_string());
-    });
-});
+make fetch
+make build-instrumented
 ```
 
-Context propagation is handled automatically through `inner-span-context`.
+No tracing whatsoever (disabled by feature flag):
 
-### 3. Benchmarks
+```
+make fetch
+make build-uninstrumented
+```
 
-Three configurations will be benchmarked against each other:
+### Compose components
+
+```
+make compose
+```
+
+### Run
+
+Needs the modified `wash` runtime included as a submodule:
+
+1. Navigate to ../deps/wasmCloud
+2. Run `cargo install --path crates/wash`
+
+```
+wash dev
+```
+
+See ./.wash/config.yaml for dev server config of wasmCloud's `wash` command.
+
+### Benchmarks
+
+Three configurations are benchmarked against each other:
 
 | Configuration         | Description                                         |
 | --------------------- | --------------------------------------------------- |

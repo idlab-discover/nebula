@@ -38,7 +38,7 @@ impl Span {
 	#[must_use]
 	pub fn new(name: &str, scope_name: &str) -> Self {
 		#[cfg(feature = "traces")]
-		let parent_context = tracing::current_span_context();
+		let parent_context = tracing::inner_span_context();
 
 		#[cfg(not(feature = "traces"))]
 		let parent_context = SpanContext {

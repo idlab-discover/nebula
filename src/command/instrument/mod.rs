@@ -166,7 +166,7 @@ fn build_splice_rules(graph: &CompositionGraph) -> Result<Vec<SpliceRule>> {
     };
 
     for (iface, export) in &graph.component_exports {
-        if !iface.contains("wasi") || iface.contains("wasi:http") {
+        if iface.contains("wasi:http") {
             let provider = graph.nodes[&export.source_instance].name.clone();
             push_rule(iface.clone(), provider);
         }

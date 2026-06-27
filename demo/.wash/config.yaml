@@ -1,6 +1,6 @@
 build:
   command: "true"
-  component_path: ./bin/nebulift-manual-instrument-rnd-1_2.wasm
+  component_path: ./target/wasm32-wasip2/release/nebulift.wasm
 
 dev:
   wasi_otel: true

@@ -19,12 +19,3 @@ registry = "wasi.dev"
 requirement = "=0.2.10"
 version = "0.2.10"
 digest = "sha256:c3fd3ac8f133431c6b8ee903303d43c86f72835045b55490493d0c17dd8b6dff"
-
-[[packages]]
-name = "wasi:otel"
-registry = "ewoutv"
-
-[[packages.versions]]
-requirement = "=0.2.0-rc.3"
-version = "0.2.0-rc.3"
-digest = "sha256:6a4d83598b2b52c6e24e8959ba9f860f663ab416ef50a0c45be0bc7d69f84c82"
